@@ -1,0 +1,9 @@
+<h2>Exercises</h2>
+
+<p>The system contains the following exercises:</p>
+
+<ul>
+#foreach( $exercise in $exercises )
+  <li>$exercise.name - $exercise.type.name</li>
+#end
+</ul>

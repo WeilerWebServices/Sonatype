@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.sonatype.com/tmp/docbook/xml/4.5/docbookx.dtd">
+<appendix id="appendix-enterprise">
+  <title>附录: Sun规格说明可选实现</title>
+
+  <para>Apache Geronimo项目维护了各种企业级Java规格说明的实现。<xref
+  linkend="table-spec-alternatives" />列出了所有实现的构件id和版本。要使用这些依赖，使用groupId
+  <varname>org.apache.geronimo.specs</varname>，找到你想要使用的规格说明版本，然后使用<xref
+  linkend="table-spec-alternatives" />中列出的构件id和构件版本来指向相应的依赖。</para>
+
+  <note>
+    <para>所有<xref
+    linkend="table-spec-alternatives" />中的构件，都拥有同样的groupId：<varname>org.apache.geronimo.specs</varname>。</para>
+  </note>
+
+  <table id="table-spec-alternatives">
+    <title>规格说明的可选实现构件</title>
+
+    <tgroup cols="4">
+      <colspec colwidth="3*" />
+
+      <colspec colwidth="2*" />
+
+      <colspec colwidth="6*" />
+
+      <colspec colwidth="1*" />
+
+      <thead>
+        <row>
+          <entry>规格说明</entry>
+
+          <entry>规格说明版本</entry>
+
+          <entry>构件id</entry>
+
+          <entry>构件版本</entry>
+        </row>
+      </thead>
+
+      <tbody>
+        <row>
+          <entry>Activation</entry>
+
+          <entry>1.0.2</entry>
+
+          <entry>geronimo-activation_1.0.2_spec</entry>
+
+          <entry>1.2</entry>
+        </row>
+
+        <row>
+          <entry>Activation</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-activation_1.1_spec</entry>
+
+          <entry>1.0.1</entry>
+        </row>
+
+        <row>
+          <entry>Activation</entry>
+
+          <entry>1.0</entry>
+
+          <entry>geronimo-activation_1.0_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>CommonJ</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-commonj_1.1_spec</entry>
+
+          <entry>1.0</entry>
+        </row>
+
+        <row>
+          <entry>Corba</entry>
+
+          <entry>2.3</entry>
+
+          <entry>geronimo-corba_2.3_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>Corba</entry>
+
+          <entry>3.0</entry>
+
+          <entry>geronimo-corba_3.0_spec</entry>
+
+          <entry>1.2</entry>
+        </row>
+
+        <row>
+          <entry>EJB</entry>
+
+          <entry>2.1</entry>
+
+          <entry>geronimo-ejb_2.1_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>EJB</entry>
+
+          <entry>3.0</entry>
+
+          <entry>geronimo-ejb_3.0_spec</entry>
+
+          <entry>1.0</entry>
+        </row>
+
+        <row>
+          <entry>EL</entry>
+
+          <entry>1.0</entry>
+
+          <entry>geronimo-el_1.0_spec</entry>
+
+          <entry>1.0</entry>
+        </row>
+
+        <row>
+          <entry>Interceptor</entry>
+
+          <entry>3.0</entry>
+
+          <entry>geronimo-interceptor_3.0_spec</entry>
+
+          <entry>1.0</entry>
+        </row>
+
+        <row>
+          <entry>J2EE Connector</entry>
+
+          <entry>1.5</entry>
+
+          <entry>geronimo-j2ee-connector_1.5_spec</entry>
+
+          <entry>1.1.1</entry>
+        </row>
+
+        <row>
+          <entry>J2EE Deployment</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-j2ee-deployment_1.1_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>J2EE JACC</entry>
+
+          <entry>1.0</entry>
+
+          <entry>geronimo-j2ee-jacc_1.0_spec</entry>
+
+          <entry>1.1.1</entry>
+        </row>
+
+        <row>
+          <entry>J2EE Management</entry>
+
+          <entry>1.0</entry>
+
+          <entry>geronimo-j2ee-management_1.0_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>J2EE Management</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-j2ee-management_1.1_spec</entry>
+
+          <entry>1.0</entry>
+        </row>
+
+        <row>
+          <entry>J2EE</entry>
+
+          <entry>1.4</entry>
+
+          <entry>geronimo-j2ee_1.4_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>JACC</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-jacc_1.1_spec</entry>
+
+          <entry>1.0</entry>
+        </row>
+
+        <row>
+          <entry>JEE Deployment</entry>
+
+          <entry>1.1MR3</entry>
+
+          <entry>geronimo-javaee-deployment_1.1MR3_spec</entry>
+
+          <entry>1.0</entry>
+        </row>
+
+        <row>
+          <entry>JavaMail</entry>
+
+          <entry>1.3.1</entry>
+
+          <entry>geronimo-javamail_1.3.1_spec</entry>
+
+          <entry>1.3</entry>
+        </row>
+
+        <row>
+          <entry>JavaMail</entry>
+
+          <entry>1.4</entry>
+
+          <entry>geronimo-javamail_1.4_spec</entry>
+
+          <entry>1.2</entry>
+        </row>
+
+        <row>
+          <entry>JAXR</entry>
+
+          <entry>1.0</entry>
+
+          <entry>geronimo-jaxr_1.0_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>JAXRPC</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-jaxrpc_1.1_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>JMS</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-jms_1.1_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>JPA</entry>
+
+          <entry>3.0</entry>
+
+          <entry>geronimo-jpa_3.0_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>JSP</entry>
+
+          <entry>2.0</entry>
+
+          <entry>geronimo-jsp_2.0_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>JSP</entry>
+
+          <entry>2.1</entry>
+
+          <entry>geronimo-jsp_2.1_spec</entry>
+
+          <entry>1.0</entry>
+        </row>
+
+        <row>
+          <entry>JTA</entry>
+
+          <entry>1.0.1B</entry>
+
+          <entry>geronimo-jta_1.0.1B_spec</entry>
+
+          <entry>1.1.1</entry>
+        </row>
+
+        <row>
+          <entry>JTA</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-jta_1.1_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>QName</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-qname_1.1_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>SAAJ</entry>
+
+          <entry>1.1</entry>
+
+          <entry>geronimo-saaj_1.1_spec</entry>
+
+          <entry>1.1</entry>
+        </row>
+
+        <row>
+          <entry>Servlet</entry>
+
+          <entry>2.4</entry>
+
+          <entry>geronimo-servlet_2.4_spec</entry>
+
+          <entry>1.1.1</entry>
+        </row>
+
+        <row>
+          <entry>Servlet</entry>
+
+          <entry>2.5</entry>
+
+          <entry>geronimo-servlet_2.5_spec</entry>
+
+          <entry>1.1.1</entry>
+        </row>
+
+        <row>
+          <entry>STaX API</entry>
+
+          <entry>1.0</entry>
+
+          <entry>geronimo-stax-api_1.0_spec</entry>
+
+          <entry>1.0.1</entry>
+        </row>
+
+        <row>
+          <entry>WS Metadata</entry>
+
+          <entry>2.0</entry>
+
+          <entry>geronimo-ws-metadata_2.0_spec</entry>
+
+          <entry>1.1.1</entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </table>
+
+  <note>
+    <para>在你阅读本书的时候，构件版本一列中的版本号可能已经过时了。你可以访问<ulink
+    url="http://repo1.maven.org/maven2/org/apache/geronimo/specs/">http://repo1.maven.org/maven2/org/apache/geronimo/specs/</ulink>以检查最新的版本号，点击你想要添加的artifactId。选择你想依赖的规格说明的最高版本号。</para>
+  </note>
+
+  <para>这里展示一下如何使用<xref
+  linkend="table-spec-alternatives" />，如果你项目中有一些代码需要和<acronym>JTA</acronym>
+  1.0.1B规格说明打交道，你就需要往项目中添加如下的依赖：</para>
+
+  <para><example>
+      <title>添加JTA 1.0.1B到项目中</title>
+
+      <programlisting language="xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.apache.geronimo.specs&lt;/groupId&gt;
+  &lt;artifactId&gt;geronimo-jta_1.0.1B_spec&lt;/artifactId&gt;
+  &lt;version&gt;1.1.1&lt;/version&gt;
+&lt;/dependency&gt;</programlisting>
+    </example></para>
+
+  <para>注意到构件的版本和规格说明的版本并不一致——这里的依赖配置添加了JTA规格说明的1.0.1B版本，但使用的构件版本是1.1.1。在依赖于Geronimo可选实现的时候要意识到这一点，同时一定要确保你使用了该规格说明最新的构件版本号。</para>
+</appendix>

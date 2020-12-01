@@ -1,0 +1,54 @@
+                </div>
+            </div>
+        </div>
+        <div class="indent1"><a href="#"><img alt="" src="images/1page_img2.jpg" /></a><a href="#"><img alt="" src="images/1page_img3.jpg" /></a><a href="#"><img alt="" src="images/1page_img4.jpg" /></a><br /></div>
+    </div>	 
+    <div id="footer">
+         <div class="indent-footer">
+         	<div class="container">
+                <div class="col-1"><img alt="" src="images/title.gif" /> &copy; 2010<br /><a href="index-6.html">Privacy Policy </a></div>
+                <div class="col-2">
+                	<h2>Newsletter:</h2>                </div>
+            </div>
+        </div>
+        <div class="indent1"><a href="#"><img alt="" src="images/1page_img2.jpg" /></a><a href="#"><img alt="" src="images/1page_img3.jpg" /></a><a href="#"><img alt="" src="images/1page_img4.jpg" /></a><br /></div>
+    </div>	 
+    <div id="footer">
+         <div class="indent-footer">
+         	<div class="container">
+                <div class="col-1"><img alt="" src="images/title.gif" /> &copy; 2010<br /><a href="index-6.html">Privacy Policy </a></div>
+                <div class="col-2">
+                	<h2>Newsletter:</h2>
+                    <form action="" id="form1"><div class=" container">
+                    	<div class="h1"><input type="text" class="input" value="Enter your e-mail here" onblur="if(this.value=='') this.value='Enter your e-mail here'" onfocus="if(this.value =='Enter your e-mail here' ) this.value=''"  /><a href="#" onclick="document.getElementById('form1').submit()"><img alt="" src="images/button.gif" /></a></div>
+                    </div></form>
+                </div>
+                <div class="col-3"><a href="#"><img alt="" src="images/icon1.gif" /></a><a href="#"><img alt="" src="images/icon2.gif" /></a><a href="#"><img alt="" src="images/icon3.gif" /></a><a href="#"><img alt="" src="images/icon4.gif" /></a></div>
+            </div>
+         </div>
+    </div>
+ </div>
+
+<script type="text/javascript"> Cufon.now(); </script>
+</body>
+</html>
+
+
+
+                	
+                    <form action="" id="form1"><div class=" container">
+                    	<div class="h1"><input type="text" class="input" value="Enter your e-mail here" onblur="if(this.value=='') this.value='Enter your e-mail here'" onfocus="if(this.value =='Enter your e-mail here' ) this.value=''"  /><a href="#" onclick="document.getElementById('form1').submit()"><img alt="" src="images/button.gif" /></a></div>
+                    </div></form>
+                </div>
+                <div class="col-3"><a href="#"><img alt="" src="images/icon1.gif" /></a><a href="#"><img alt="" src="images/icon2.gif" /></a><a href="#"><img alt="" src="images/icon3.gif" /></a><a href="#"><img alt="" src="images/icon4.gif" /></a></div>
+            </div>
+         </div>
+    </div>
+ </div>
+
+<script type="text/javascript"> Cufon.now(); </script>
+</body>
+</html>
+
+
+

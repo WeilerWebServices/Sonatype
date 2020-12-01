@@ -1,0 +1,9 @@
+<component-set>
+  <components>
+    <component>
+      <role>org.codehaus.modello.plugin.ModelloGenerator</role>
+      <role-hint>upgrade</role-hint>
+      <implementation>org.sonatype.modello.plugin.upgrade.UpgradeGenerator</implementation>
+    </component>
+  </components>
+</component-set>

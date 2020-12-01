@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.sonatype.plugins</groupId>
+		<artifactId>plugins-parent</artifactId>
+		<version>5</version>
+	</parent>
+  <groupId>org.sonatype.plugins</groupId>
+  <artifactId>plx-maven-plugin</artifactId>
+  <packaging>maven-plugin</packaging>
+  <version>1.7-SNAPSHOT</version>
+  <name>Sonatype Plexus Plugin</name>
+  <description>Boot up a Plexus container for any component for quick development. Very similar in nature to the jetty:run incarnation.</description>
+  
+  <properties>
+    <maven.version>2.1-SONATYPE-653485</maven.version>
+    <maven.artifact.version>3.0-SONATYPE-653272</maven.artifact.version>
+    <appbooter.version>1.6.5</appbooter.version>
+  </properties>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>1.5.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>${maven.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.artifact</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <version>${maven.artifact.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>${maven.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.appbooter.plexus-booters</groupId>
+      <artifactId>plexus-app-booter</artifactId>
+      <version>${appbooter.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>velocity</groupId>
+      <artifactId>velocity</artifactId>
+      <version>1.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.sonatype.appbooter</groupId>
+      <artifactId>plexus-forked-app-booter</artifactId>
+      <version>${appbooter.version}</version>
+    </dependency>
+
+
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>descriptor</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

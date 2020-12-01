@@ -1,0 +1,53 @@
+Description: Remove some lingering references to Java 6 (Guice 4.2+ requires Java 7)
+Author: Stuart McCulloch <mcculls@gmail.com>
+Bug-Google: https://github.com/google/guice/issues/1171
+Last-Update: 2019-07-13
+
+diff --git a/core/pom.xml b/core/pom.xml
+index 2a81de58..03dd0fbc 100644
+--- a/core/pom.xml
++++ b/core/pom.xml
+@@ -86,7 +86,7 @@
+         <artifactId>maven-remote-resources-plugin</artifactId>
+       </plugin>
+       <!--
+-       | Enable Java6 conformance checks
++       | Enable Java7 conformance checks
+       -->
+       <plugin>
+         <groupId>org.codehaus.mojo</groupId>
+diff --git a/extensions/pom.xml b/extensions/pom.xml
+index ff8350e7..d1da67c8 100644
+--- a/extensions/pom.xml
++++ b/extensions/pom.xml
+@@ -90,7 +90,7 @@
+         <artifactId>maven-remote-resources-plugin</artifactId>
+       </plugin>
+       <!--
+-       | Enable Java6 conformance checks
++       | Enable Java7 conformance checks
+       -->
+       <plugin>
+         <groupId>org.codehaus.mojo</groupId>
+diff --git a/pom.xml b/pom.xml
+index ebb0d028..60b3c958 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -32,7 +32,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
+   <name>Google Guice</name>
+ 
+   <description>
+-    Guice is a lightweight dependency injection framework for Java 6 and above
++    Guice is a lightweight dependency injection framework for Java 7 and above
+   </description>
+ 
+   <url>https://github.com/google/guice</url>
+@@ -345,7 +345,7 @@ See the Apache License Version 2.0 for the specific language governing permissio
+               <Bundle-DocURL>https://github.com/google/guice</Bundle-DocURL>
+               <Bundle-Name>${project.artifactId}</Bundle-Name>
+               <Bundle-SymbolicName>$(module)</Bundle-SymbolicName>
+-              <Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
++              <Bundle-RequiredExecutionEnvironment>JavaSE-1.7</Bundle-RequiredExecutionEnvironment>
+               <Import-Package>!com.google.inject.*,*</Import-Package>
+               <_exportcontents>!*.internal.*,$(module).*;version=${guice.api.version}</_exportcontents>
+               <_versionpolicy>$(version;==;$(@))</_versionpolicy>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	<bean name="/home.s" class="com.sonatype.workout.web.HomeController" />
+
+	<bean name="/signup.s"
+          class="com.sonatype.workout.web.SignupController">
+		<property name="authService" ref="authService"/>
+		<property name="userService" ref="userService"/>
+        <property name="formView" value="signup"/>
+        <property name="successView" value="signup-completed"/>
+        <property name="commandName" value="signup"/>
+        <property name="commandClass" value="com.sonatype.workout.web.command.SignupCommand"/>
+        <property name="validator" ref="signupValidator"/>
+    </bean>
+
+	<bean name="/login.s"
+          class="com.sonatype.workout.web.LoginController">
+		<property name="userService" ref="userService"/>
+        <property name="formView" value="login"/>
+        <property name="successView" value="home"/>
+        <property name="commandName" value="login"/>
+        <property name="commandClass" value="com.sonatype.workout.web.command.LoginCommand"/>
+        <property name="validator" ref="loginValidator"/>
+    </bean>
+
+	<bean name="/user.s" class="com.sonatype.workout.web.UserController">
+		<constructor-arg ref="userService" />
+	</bean>
+
+	<bean name="/workout.s"
+          class="com.sonatype.workout.web.WorkoutController">
+        <property name="workoutService" ref="workoutService"/>
+        <property name="formView" value="workout"/>
+        <property name="successView" value="view-workout"/>
+        <property name="commandName" value="workout"/>
+        <property name="commandClass" value="com.sonatype.workout.web.command.WorkoutCommand"/>
+    </bean>
+
+	<bean name="/view-workout.s"
+          class="com.sonatype.workout.web.ViewWorkoutController">
+        <property name="workoutService" ref="workoutService"/>
+    </bean>
+
+	<!-- This bean sets up the Velocity environment for us based on a root path 
+		for templates. Optionally, a properties file can be specified for more control 
+		over the Velocity environment, but the defaults are pretty sane for file 
+		based template loading. -->
+	<bean id="velocityConfig"
+		class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+		<property name="resourceLoaderPath" value="/WEB-INF/velocity/" />
+	</bean>
+
+	<!-- View resolvers can also be configured with ResourceBundles or XML files. 
+		If you need different view resolving based on Locale, you have to use the 
+		resource bundle resolver. -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
+		<property name="cache" value="true" />
+		<property name="prefix" value="" />
+		<property name="suffix" value=".vm" />
+
+		<!-- if you want to use the Spring Velocity macros, set this property to 
+			true -->
+		<property name="exposeSpringMacroHelpers" value="true" />
+
+	</bean>
+	
+	<bean id="signupValidator" class="com.sonatype.workout.web.command.SignupValidator">
+		<property name="userService" ref="userService"/>
+	</bean>
+	
+	<bean id="loginValidator" class="com.sonatype.workout.web.command.LoginValidator">
+		<property name="authService" ref="authService"/>
+		<property name="userService" ref="userService"/>
+	</bean>
+
+</beans>

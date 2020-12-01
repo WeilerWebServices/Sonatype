@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %Bundle-Name
+Bundle-SymbolicName: org.sonatype.m2e.guice.tests;singleton:=true
+Bundle-Version: 0.0.1.qualifier
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: plugin
+Eclipse-LazyStart: true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+ JavaSE-1.6
+Require-Bundle: org.junit, org.easymock
+Fragment-Host: org.sonatype.m2e.guice
+MavenArtifact-GroupId: org.sonatype.m2e.guice
+MavenArtifact-ArtifactId: org.sonatype.m2e.guice.tests
+

@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<book id="book-mavenTheDefinitiveGuide" lang="fr">
+  <title>${book.title}</title>
+
+  <bookinfo>
+    <isbn>9780596517335</isbn>
+
+    <edition>${project.version}</edition>
+
+    <editor>
+      <firstname>Mike</firstname>
+
+      <surname>Loukides</surname>
+
+      <affiliation>
+        <orgname>O'Reilly Media</orgname>
+      </affiliation>
+    </editor>
+
+    <authorgroup role="Auteurs">
+      <author>
+        <firstname>Tim</firstname>
+
+        <surname>O'Brien</surname>
+
+        <affiliation>
+          <orgname>${project.organization.name}</orgname>
+        </affiliation>
+      </author>
+
+      <author>
+        <firstname>John</firstname>
+
+        <surname>Casey</surname>
+
+        <affiliation>
+          <orgname>${project.organization.name}</orgname>
+        </affiliation>
+      </author>
+
+      <author>
+        <firstname>Brian</firstname>
+
+        <surname>Fox</surname>
+
+        <affiliation>
+          <orgname>${project.organization.name}</orgname>
+        </affiliation>
+      </author>
+
+      <author>
+        <firstname>Bruce</firstname>
+
+        <surname>Snyder</surname>
+
+        <affiliation>
+          <orgname>${project.organization.name}</orgname>
+        </affiliation>
+      </author>
+
+      <author>
+        <firstname>Jason</firstname>
+
+        <surname>Van Zyl</surname>
+
+        <affiliation>
+          <orgname>${project.organization.name}</orgname>
+        </affiliation>
+      </author>
+    </authorgroup>
+
+    <authorgroup role="Contributeurs">
+      <author>
+        <firstname>Eric</firstname>
+
+        <surname>Redmond</surname>
+      </author>
+
+      <author>
+        <firstname>Larry</firstname>
+
+        <surname>Shatzer</surname>
+      </author>
+    </authorgroup>
+    
+    <authorgroup role="Traducteurs">
+    
+      <author>
+        <firstname>Emmanuel</firstname>
+
+        <surname>Hugonnet</surname>
+
+        <affiliation>
+          <orgname>Silverpeas</orgname>
+        </affiliation>
+      </author>
+      
+      <author>
+        <firstname>Erwan</firstname>
+
+        <surname>Alliaume</surname>
+
+        <affiliation>
+          <orgname>Xebia IT Architects</orgname>
+        </affiliation>
+      </author>
+      
+      
+      <!--
+      <author>
+        <firstname>Jérôme</firstname>
+
+        <surname>Van Der Linden</surname>
+
+        <affiliation>
+          <orgname>Octo Technology</orgname>
+        </affiliation>
+      </author>          
+      -->
+      
+    </authorgroup>
+
+    
+
+    <!--    <publisher>
+      <publishername>O’Reilly</publishername>
+    </publisher> -->
+
+    <abstract role="description-short">
+      <para>Maven: The Definitive Guide est un livre à propos d'Apache Maven.</para>
+    </abstract>
+
+    <!--    <bibliomisc role="errata"><ulink
+    url="http://www.oreilly.com/catalog/9780596517335/errata/"></ulink></bibliomisc>
+
+    <bibliomisc role="reviews-published"><ulink
+    url="http://www.oreilly.com/catalog/9780596517335/reviews.html"></ulink></bibliomisc>
+
+    <bibliomisc role="reviews-reader"><ulink
+    url="http://www.oreilly.com/cgi-bin/reviews?bookident=9780596517335"></ulink></bibliomisc>
+
+    <bibliomisc role="catalog-page"><ulink
+    url="http://www.oreilly.com/catalog/9780596517335/"></ulink></bibliomisc>
+
+    <bibliomisc role="buyprint"><ulink
+    url="https://epoch.oreilly.com/shop/cart.asp?prod=0-596-00696-9"></ulink></bibliomisc>
+
+    <bibliomisc role="academic"><ulink
+    url="http://academic.oreilly.com"></ulink></bibliomisc> -->
+
+    <!--  offlinecontentlist to be filled in by sfmetafetch  -->
+  </bookinfo>
+
+  <xi:include href="chapter-copyright.xml"
+              xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+  <xi:include href="public-foreword.xml"
+              xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+  <xi:include href="chapter-public-preface.xml"
+              xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+  <xi:include href="chapter-introduction.xml"
+              xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+  <xi:include href="chapter-installation.xml"
+              xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+  <part id="part-example">
+    <title>Maven par l'exemple</title>
+
+    <partintro>
+      <para>Le premier livre à traiter de Maven fut <emphasis>Maven: A Developer’s
+      Notebook</emphasis> (O’Reilly). Ce livre introduisait Maven en plusieurs étapes
+      via une conversation entre vous et un collègue qui savait déjà comment utiliser
+      Maven. L'idée derrière la série des Developer’s Notebook (maintenant arrêtée)
+      était que les développeurs apprennent mieux lorsqu'ils sont assis à côté d'autres
+      développeurs et qu'ils passent par les mêmes schémas de pensée, apprenant à coder
+      en réalisant et en expérimentant. Même si cette série fut un succès, le format
+      Cahier avait des limitations. Les Cahiers du Développeur sont, par essence, des livres
+      "avec un but précis" qui vous font passer par une série d'étapes pour atteindre
+      des buts très spécifiques. Au contraire, les gros livres de reférence
+      (les livres avec un animal chez O’Reilly) apportent un matériel de référence qui
+      couvre un sujet dans son entier.</para>
+
+      <para>Si vous lisez <emphasis>Maven: A Developer’s Notebook</emphasis>,
+      vous apprendrez comment créer un projet simple ou un projet qui construit
+      un WAR à partir de fichiers source. Mais si vous voulez comprendre les
+      spécificités d'un point particulier comme le plugin Assembly, vous vous retrouverez dans
+      une impasse. Comme il n'existe pas de matériel de référence correctement écrit
+      sur Maven, vous devrez partir à la chasse dans la documentation des plugins
+      sur le site de Maven ou fouiller les listes de diffusion. Une fois que vous
+      vous êtes réellement plongé dans Maven, vous avez dû lire des milliers de pages
+      HTML sur le site de Maven écrites par des centaines de développeurs différents,
+      chacun avec sa propre idée de ce que doit contenir la documentation d'un plugin.
+      Malgré les efforts de contributeurs de bonne volonté, lire la documentation des
+      plugins sur le site de Maven est au mieux frustrant, et au pire, suffisamment
+      décourageant pour abandonner Maven. Assez souvent, les utilisateurs de Maven
+      restent bloqués car ils ne trouvent pas de réponse.</para>
+
+      <para>Cette absence d'un manuel de référence (voire ultime)
+      a bloqué Maven pendant quelques années, et a été un frein à son adoption. Avec
+      <emphasis>Maven: The Definitive Guide</emphasis>, nous avons
+      l'intention de changer tout ça en fournissant une référence complète dans la
+      <xref linkend="part-reference" />. Dans la Partie I, nous avons conservé la progression
+      narrative d'un Cahier du Développeur ; elle est intéressante car elle permet
+      d'apprendre Maven par l'exemple. Dans cette partie nous "introduisons en faisant", et dans
+      la <xref linkend="part-reference" />, nous comblons les manques et nous nous plongeons dans
+      les détails. Là où la <xref linkend="part-reference" /> pourrait utiliser un tableau de référence
+      et un listing de programme déconnecté d'un projet exemple, la Partie II est animée
+      par de véritables exemples.</para>
+
+      <para>Après avoir lu cette partie, vous devriez en savoir suffisamment pour commencer
+      à utiliser Maven. Vous auriez besoin de vous référer à la <xref linkend="part-reference" />
+      uniquement lorsque vous commencer à personnaliser Maven en écrivant vos propres plugins
+      ou si vous voulez plus de détails sur un plugin particulier.</para>
+    </partintro>
+
+    <xi:include href="chapter-simple-project.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-customization.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-web.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-multimodule.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-multimodule-spring-web.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-optimizing.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+  </part>
+
+  <part id="part-reference">
+    <title>Maven - La Reference</title>
+
+    <xi:include href="chapter-pom-relationships.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-lifecycle.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-profiles.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-running.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-configuring.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-assemblies.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-resource-filtering.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-site-generation.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <!--    <xi:include href="chapter-reporting.xml"
+       xmlns:xi="http://www.w3.org/2001/XInclude"/> -->
+
+    <xi:include href="chapter-writing-plugins.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-archetypes.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+    <xi:include href="chapter-flex-dev.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+  </part>
+
+  <!--    <xi:include href="appendix-pom-details.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" /> -->
+
+  <xi:include href="appendix-settings-details.xml"
+              xmlns:xi="http://www.w3.org/2001/XInclude" />
+
+  <!--  <xi:include href="appendix-plugin-api.xml"
+              xmlns:xi="http://www.w3.org/2001/XInclude" /> -->
+
+  <xi:include href="appendix-enterprise.xml"
+              xmlns:xi="http://www.w3.org/2001/XInclude" />
+</book>

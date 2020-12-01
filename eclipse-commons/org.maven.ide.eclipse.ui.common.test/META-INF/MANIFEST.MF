@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.maven.ide.eclipse.ui.common.test
+Bundle-SymbolicName: org.maven.ide.eclipse.ui.common.test;singleton:=true
+Bundle-Version: 1.1.7.qualifier
+Bundle-Vendor: Sonatype, Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+ JavaSE-1.6
+Require-Bundle: org.junit4,
+ org.eclipse.core.runtime,
+ org.eclipse.ui,
+ org.eclipse.ui.forms,
+ org.maven.ide.eclipse.authentication,
+ org.maven.ide.eclipse.ui.common,
+ org.maven.ide.eclipse.io,
+ org.maven.ide.eclipse.swtvalidation,
+ org.maven.ide.eclipse.ui.tests.common
+Export-Package: org.maven.ide.eclipse.ui.common.test
+

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.maven.ide.eclipse.scala</groupId>
+  <artifactId>m2eclipse-scala</artifactId>
+  <version>0.5.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <tycho.version>0.21.0</tycho.version>
+    <encoding>UTF-8</encoding>
+  </properties>
+
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+
+  <modules>
+    <module>org.maven.ide.eclipse.scala</module>
+    <module>org.maven.ide.eclipse.scala_feature</module>
+    <module>org.maven.ide.eclipse.scala_site</module>
+  </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <resolver>p2</resolver>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <repositories>
+    <repository>
+      <id>m2eclipse</id>
+      <layout>p2</layout>
+      <url>http://download.eclipse.org/technology/m2e/releases</url>
+    </repository>
+    <repository>
+      <id>scala-ide</id>
+      <layout>p2</layout>
+      <url>http://download.scala-ide.org/releases-29/stable/site</url>
+    </repository>
+    <repository>
+      <id>indigo</id>
+      <url>http://download.eclipse.org/releases/indigo/</url>
+      <layout>p2</layout>
+    </repository>
+  </repositories>
+</project>

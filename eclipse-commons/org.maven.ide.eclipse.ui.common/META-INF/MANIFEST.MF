@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+MavenArtifact-BaseVersion: 1.0.0-SNAPSHOT
+Bundle-Version: 1.1.7.qualifier
+MavenArtifact-ArtifactId: org.maven.ide.eclipse.ui.common
+MavenArtifact-GroupId: org.maven.ide.eclipse.commons
+Bundle-Name: Maven Eclipse UI Commons
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.maven.ide.eclipse.ui.common;singleton:=true
+Bundle-RequiredExecutionEnvironment: J2SE-1.5, JavaSE-1.6
+Import-Package: org.eclipse.equinox.security.storage.provider
+Require-Bundle: org.eclipse.osgi,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.ui,
+ org.eclipse.ui.forms,
+ org.maven.ide.eclipse.authentication,
+ org.maven.ide.eclipse.io,
+ org.maven.ide.eclipse.swtvalidation,
+ org.slf4j.api;bundle-version="1.5.11"
+Export-Package: org.maven.ide.eclipse.ui.common,
+ org.maven.ide.eclipse.ui.common.authentication,
+ org.maven.ide.eclipse.ui.common.composites,
+ org.maven.ide.eclipse.ui.common.dialogs,
+ org.maven.ide.eclipse.ui.common.layout,
+ org.maven.ide.eclipse.ui.common.validation,
+ org.maven.ide.eclipse.ui.common.wizards
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: org.maven.ide.eclipse.ui.common.Activator
+Bundle-Vendor: Sonatype, Inc.
+

@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.maven.ide.eclipse.auth
+Bundle-SymbolicName: org.maven.ide.eclipse.authentication;singleton:=true
+Bundle-Version: 1.1.7.qualifier
+Bundle-Vendor: Sonatype, Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5,
+ JavaSE-1.6
+Export-Package: org.maven.ide.eclipse.authentication,
+ org.maven.ide.eclipse.authentication.internal,
+ org.maven.ide.eclipse.authentication.internal.storage
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.equinox.security,
+ org.slf4j.api;bundle-version="1.5.11"
+Bundle-Activator: org.maven.ide.eclipse.authentication.internal.AuthenticationPlugin
+Bundle-ActivationPolicy: lazy

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="repository-manager">
+  <title>Repository Management mit Nexus</title>
+
+  <para>Dieses Kapitel ist veraltet. Obschon die Originalausgabe von 'Maven:
+  The Definitive Guide' ein eigenes Kapitel dem Nexus Repository Manager
+  widmete, hat Sonatype erwogen, dass dieses Thema sich schnell genug
+  weiterentwickelte und vergrösserte, dass es sich lohnt, dieses in einen
+  eigenen Titel herauszulösen. Wir haben uns also dazu entschlossen den Inhalt
+  des Kapitels Repository Management in ein eigenes Buch <ulink
+  url="${nexus.book.baseurl}">Repository Management with Nexus</ulink>
+  herauszulösen. Der neue Titel deckt beide Repostitory Management Packete
+  <ulink url="http://nexus.sonatype.org">Nexus Open Source</ulink> sowie
+  <ulink url="http://www.sonatype.com/products/nexus">Nexus
+  Professional</ulink> ab.Sie werden durch den Prozess des Herunterladens und
+  Installieren eines Repository Managers geleitet. Weiter gibt das Buch einen
+  umfassenden Überblick der möglichen Konfigurationen. </para>
+
+  <para><ulink url="http://books.sonatype.com/nexus-book">Folgen Sie diesem
+  Verweis um das Buch 'Repository Management with Nexus' zu
+  lesen</ulink></para>
+
+  <note>
+    <para>In der Vergangenheit war ein Buch eine eher statische Angelegenheit.
+    Es wurde geschrieben, editiert, gegengelesen dann gedruckt. Nach dem Druck
+    gab es wenige Möglichkeiten sich über die Struktur des Buches Gedanken zu
+    machen. Das Internet hingegen eröffnet Möglichkeiten ein Real-Time
+    jederzeit abrufbereites Buch zu erstellen, welches sich beständig
+    weiterentwickelt. Die Verlagsindustrie muss sich erst noch anfreunden mit
+    der Art 'lebender' Bücher - Bücher welche sich bereits am Tag nach dem
+    dieses zum Druck gehen verändern können; Bücher welche gespalten werden
+    sobald diese über ein Mass hinaus wachsen und dann weiterwachsen. Wir
+    haben uns entschlossen diesen Schnitt zu machen, da er uns sinnvoll
+    erscheint. Sobald ein Kapitel sich in ein Hunderte Seiten langes Biest
+    entwickelt lohnt es sich nicht, eine jetzt schon starke Referenz weiter
+    aufzublähen. (Aber ein Buch ist ja auch nicht 'schwer' liest man diese im
+    Webbrowser, das ist eine Sache der Perspective!)</para>
+
+    <para>Was für die Softare entwicklung gilt, gilt ebenso beim schreiben
+    eines Buches. Sollten Sie mit einem klar abgegrenzten und abgeschlossenen
+    Projekt beginnen, so wird eine Zeit kommen, zu welcher es sinn macht
+    dieses Projekt zu refaktorieren, die Bestandteile neu zu ordnen und module
+    herauszulösen. Das ist genau der Prozess welchen wir hier beschreiten, wir
+    refaktorieren das bestehende Buch in zwei schärfer definierte Bücher.
+    </para>
+
+    <para>Nehmen Sie diese Randnotiz als Warnung wahr. Es wird eine Zeit
+    kommen zu welcher wir auch dieses Rumpfkapitel aus dem Buch entfernen
+    werden. Das Web wird einen Verweis auf das neue Buch erhalten und im
+    <acronym>PDF</acronym> wird eine Referenz erhalten bleiben, welche auf das
+    Nexus Buch zeigt. </para>
+  </note>
+</chapter>

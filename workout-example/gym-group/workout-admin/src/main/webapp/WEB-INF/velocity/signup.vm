@@ -1,0 +1,47 @@
+<h2>Signup for a New Account</h2>
+
+<p>Fill out the following form to signup for a new account:</p>
+
+<form method="POST">
+  First Name: 
+  #springBind( "signup.firstName" )
+    <input type="text" 
+           name="${status.expression}" 
+           value="$!status.value" /><br>
+     #foreach($error in $status.errorMessages) <b>$error</b> <br> 
+  #end
+  <br>
+  Last Name: 
+  #springBind( "signup.lastName" )
+    <input type="text" 
+           name="${status.expression}" 
+           value="$!status.value" /><br>
+     #foreach($error in $status.errorMessages) <b>$error</b> <br> 
+  #end
+  <br>
+  Select a Login: 
+  #springBind( "signup.login" )
+    <input type="text" 
+           name="${status.expression}" 
+           value="$!status.value" /><br>
+     #foreach($error in $status.errorMessages) <b>$error</b> <br> 
+  #end
+  <br>
+  Choose a Password: 
+  #springBind( "signup.password" )
+    <input type="password" 
+           name="${status.expression}" 
+           value="$!status.value" /><br>
+     #foreach($error in $status.errorMessages) <b>$error</b> <br> 
+  #end
+  <br>
+  Confirm Password: 
+  #springBind( "signup.passwordConfirm" )
+    <input type="password" 
+           name="${status.expression}" 
+           value="$!status.value" /><br>
+     #foreach($error in $status.errorMessages) <b>$error</b> <br> 
+  #end
+  <br>
+  <input type="submit" value="submit"/>
+</form>

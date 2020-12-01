@@ -1,0 +1,29 @@
+This project aims to be a very flexible git repo server, and should require no
+specific infrastructure. All authentication and authorization is delegated to
+Apache Shiro, which itself is very flexible.
+
+Before building this project, you currently have to build Shiro from source
+yourself. See http://incubator.apache.org/shiro/download.html
+
+TODO and GOTCHAS:
+
+If a user pushes to a git repo path which does not already have a git repo in
+it, a git repo is automatically created there (given permissions check out).
+That is likely not the desired behavior for all installations.
+
+The Main class example is mildly useful on its own. A proper server config and
+deployment mechanism is needed.
+
+USING
+
+If you want to try the server, build and boot it up. Then:
+
+mkdir repo
+cd repo
+git init
+touch README
+git add README
+git commit -m 'first commit'
+git remote add origin ssh://USERNAME@localhost:2222/repo.git
+git push origin master
+

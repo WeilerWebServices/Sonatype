@@ -1,0 +1,860 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<appendix id="appendix-settings" lang="fr">
+  <title>Annexe : détails des settings</title>
+
+  <section id="appendix-settings-sect-quick-overview">
+    <title>Aperçu rapide</title>
+
+    <para>La balise <varname>settings</varname> du fichier <filename>settings.xml</filename> contient les balises utilisées pour définir les valeurs qui permettent de configurer l'exécution de Maven. 
+    Les paramètres de ce fichier doivent s'appliquer à plusieurs projets, 
+    ils ne doivent donc pas s'appliquer à une configuration spécifique. 
+    Ils permettent par exemple de configurer les dépôts locaux, les serveurs de repository alternatifs, les informations d'authentification.
+    Ce fichier <filename>settings.xml</filename> peut se trouver à deux emplacements :</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Répertoire d'installation de Maven :
+        <filename>$M2_HOME/conf/settings.xml</filename></para>
+      </listitem>
+
+      <listitem>
+        <para>Fichier spécifique à un utilisateur :
+        <filename>~/.m2/settings.xml</filename></para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Voici un aperçu des balises de haut niveau à insérer dans la balise <varname>settings</varname> :</para>
+
+    <para><example>
+        <title>Aperçu des balises haut niveau du settings.xml</title>
+
+        <programlisting language="xml">&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  &lt;localRepository/&gt;
+  &lt;interactiveMode/&gt;
+  &lt;usePluginRegistry/&gt;
+  &lt;offline/&gt;
+  &lt;pluginGroups/&gt;
+  &lt;servers/&gt;
+  &lt;mirrors/&gt;
+  &lt;proxies/&gt;
+  &lt;profiles/&gt;
+  &lt;activeProfiles/&gt;
+&lt;/settings&gt;
+</programlisting>
+      </example></para>
+  </section>
+
+  <section id="appendix-settings-sect-details">
+    <title>Détails des settings</title>
+
+    <section id="appendix-settings-sect-simpleval">
+      <title>Valeurs simples</title>
+
+      <para>La moitié des éléments de haut niveau des paramètres sont des valeurs simples
+      qui permettent de configurer le comportement de base de Maven :</para>
+
+      <para><example>
+          <title>Balises simples de haut niveau du settings.xml</title>
+
+          <programlisting language="xml">&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  &lt;localRepository&gt;\${user.dir}/.m2/repository&lt;/localRepository&gt;
+  &lt;interactiveMode&gt;true&lt;/interactiveMode&gt;
+  &lt;usePluginRegistry&gt;false&lt;/usePluginRegistry&gt;
+  &lt;offline&gt;false&lt;/offline&gt;
+  &lt;pluginGroups&gt;
+    &lt;pluginGroup&gt;org.codehaus.mojo&lt;/pluginGroup&gt;
+  &lt;/pluginGroups&gt;
+  ...
+&lt;/settings&gt;
+</programlisting>
+        </example></para>
+
+      <para>Les balises simples de haut niveau sont :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>localRepository</term>
+
+          <listitem>
+            <para>Cette valeur correspond au chemin du dépôt local. Sa valeur par défaut est 
+            <filename>\${user.dir}/.m2/repository</filename>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>interactiveMode</term>
+
+          <listitem>
+            <para><varname>true</varname> si Maven doit essayer d'intéragir avec les entrées de l'utilisateur, 
+            <varname>false</varname> sinon. Sa valeur par défaut est <varname>true</varname>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>usePluginRegistry</term>
+
+          <listitem>
+            <para><varname>true</varname> si Maven doit utiliser le fichier 
+            <filename>\${user.dir}/.m2/plugin-registry.xml</filename> pour gérer les versions des plugins, sa valeur par défaut est 
+            <varname>false</varname>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>offline</term>
+
+          <listitem>
+            <para><varname>true</varname> si le système de build doit fonctionner en mode hors connexion, sa valeur par défaut est <varname>false</varname>. 
+            Cette balise est très utilile pour les serveurs de build qui ne peuvent pas se connecter à des dépôts distants, soit par ce qu'il ne dispose pas de réseau, soit pour des raisons de sécurité.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>pluginGroups</term>
+
+          <listitem>
+            <para>Cette balise contient un liste de balises <sgmltag>pluginGroup</sgmltag>, 
+            chaque balise contenant un <sgmltag>groupId</sgmltag>. 
+            La liste est utilisée lorsqu'un plugin est lancé et que le son <sgmltag>groupId</sgmltag> n'est pas fournit par la ligne de commande. 
+            Cette liste contient <varname>org.apache.maven.plugins</varname> par défaut.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section id="appendix-settings-sect-servers">
+      <title>Balise <varname>servers</varname></title>
+
+      <para>La balise <sgmltag>distributionManagement</sgmltag> du <acronym>POM</acronym> définit les repository à utiliser pour le déploiement. 
+      Cependant, certains paramètres tels que les certificats de sécurité ne doivent pas être distribué avec le <filename>pom.xml</filename>. 
+      Ce type d'information doit se trouver dans le fichier <filename>settings.xml</filename> du serveur de construction.</para> 
+      
+      <para><example>
+          <title>Configuration serveur du settings.xml</title>
+
+          <programlisting language="xml">&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  ...
+  &lt;servers&gt;
+    &lt;server&gt;
+      &lt;id&gt;server001&lt;/id&gt;
+      &lt;username&gt;my_login&lt;/username&gt;
+      &lt;password&gt;my_password&lt;/password&gt;
+      &lt;privateKey&gt;\${user.home}/.ssh/id_dsa&lt;/privateKey&gt;
+      &lt;passphrase&gt;some_passphrase&lt;/passphrase&gt;
+      &lt;filePermissions&gt;664&lt;/filePermissions&gt;
+      &lt;directoryPermissions&gt;775&lt;/directoryPermissions&gt;
+      &lt;configuration&gt;&lt;/configuration&gt;
+    &lt;/server&gt;
+  &lt;/servers&gt;
+  ...
+&lt;/settings&gt;
+</programlisting>
+        </example></para>
+
+      <para>Les balises utilisables dans <varname>servers</varname>:</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>id</term>
+
+          <listitem>
+            <para>Il s'agit de l'<sgmltag>id</sgmltag> du serveur (ce n'est pas le login utilisateur) 
+            il correspond à l'<sgmltag>id</sgmltag> de la balise <sgmltag>distributionManagement</sgmltag> du répository.</para>  
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>username, password</term>
+
+          <listitem>
+            <para>Ces éléments apparaissent sous la forme d'une paire indiquant l'identifiant et le mot de passe requis pour vous authentifier sur ce serveur.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>privateKey, passphrase</term>
+
+          <listitem>
+            <para>Comme pour les deux éléments précédents, cette paire indique le chemin vers une clé privée 
+            (qui se trouve par défaut dans <filename>\${user.home}/.ssh/id_dsa</filename>) et une passphrase, si nécessaire.
+            Les balises <filename>passphrase</filename> et <filename>password</filename> pourront être externalisées dans le futur,
+            pour le moment leur valeur doit être rentré en plain-text dans le fichier 
+            <filename>settings.xml</filename>.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <variablelist>
+        <varlistentry>
+          <term>filePermissions, directoryPermissions</term>
+
+          <listitem>
+            <para>Lorsqu'un fichier ou un répertoire est créé lors du déploiement dans un dépôt, ces permissions sont utilisées.
+            Les valeurs autorisées des nombres à trois chiffres correspondant aux permissions fichiers *nix, comme 664 ou 775.</para>  
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section id="appendix-settings-sect-mirrors">
+      <title>Balise <varname>mirrors</varname></title>
+
+      <para><example>
+          <title>Configuration des mirroirs dans le fichier settings.xml</title>
+
+          <programlisting language="xml">&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  ...
+  &lt;mirrors&gt;
+    &lt;mirror&gt;
+      &lt;id&gt;planetmirror.com&lt;/id&gt;
+      &lt;name&gt;PlanetMirror Australia&lt;/name&gt;
+      &lt;url&gt;http://downloads.planetmirror.com/pub/maven2&lt;/url&gt;
+      &lt;mirrorOf&gt;central&lt;/mirrorOf&gt;
+    &lt;/mirror&gt;
+  &lt;/mirrors&gt;
+  ...
+&lt;/settings&gt;
+</programlisting>
+        </example></para>
+
+      <para><variablelist>
+          <varlistentry>
+            <term>id, name</term>
+
+            <listitem>
+              <para>Identifiant unique d'un mirroir. L'id est utilisé pour différencier plusieurs miroirs.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist><variablelist>
+          <varlistentry>
+            <term>url</term>
+
+            <listitem>
+              <para>L'<acronym>URL</acronym> de base de ce miroir. Le système de build utilisera cette <acronym>URL</acronym> 
+              pour se connecter à un dépôt plutôt que d'utiliser l'<acronym>URL</acronym> du serveur par défaut.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist><variablelist>
+          <varlistentry>
+            <term>mirrorOf</term>
+
+            <listitem>
+              <para>L'id du serveur dont ce miroir fait référence. 
+              Par exemple, utilisez cette balise pour pointer vers un miroir du serveur central Maven
+              (<ulink
+              url="http://repo1.maven.org/maven2">http://repo1.maven.org/maven2</ulink>).
+              Il ne doit pas s'agir de 'id du miroir.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+    </section>
+
+    <section id="appendix-settings-sect-proxies">
+      <title>Balise <varname>proxies</varname></title>
+
+      <para><example>
+          <title>Configuration d'un proxy à partir du settings.xml</title>
+
+          <programlisting language="xml">&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  ...
+  &lt;proxies&gt;
+    &lt;proxy&gt;
+      &lt;id&gt;myproxy&lt;/id&gt;
+      &lt;active&gt;true&lt;/active&gt;
+      &lt;protocol&gt;http&lt;/protocol&gt;
+      &lt;host&gt;proxy.somewhere.com&lt;/host&gt;
+      &lt;port&gt;8080&lt;/port&gt;
+      &lt;username&gt;proxyuser&lt;/username&gt;
+      &lt;password&gt;somepassword&lt;/password&gt;
+      &lt;nonProxyHosts&gt;*.google.com|ibiblio.org&lt;/nonProxyHosts&gt;
+    &lt;/proxy&gt;
+  &lt;/proxies&gt;
+  ...
+&lt;/settings&gt;
+</programlisting>
+        </example></para>
+
+      <para><variablelist>
+          <varlistentry>
+            <term>id</term>
+
+            <listitem>
+              <para>Identifiant unique du proxy. Celui-ci est utilisé pour différencier les éléments <varname>proxy</varname>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>active</term>
+
+            <listitem>
+              <para><varname>true</varname> si ce proxy est activé. 
+              Vous pouvez ainsi configurer plusieurs proxy, mais d'en activer un seul à la fois à la demande.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>protocol, host, port</term>
+
+            <listitem>
+              <para>Les <varname>protocol://host:port</varname> d'un proxy.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>username, password</term>
+
+            <listitem>
+              <para>Ces éléments apparaissent sous la forme d'une paire indiquant l'identifiant et le mot de passe requis pour vous authentifier sur ce serveur proxy.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>nonProxyHosts</term>
+
+            <listitem>
+              <para>Liste des Hosts pour lesquels il ne faut pas utiliser de proxy.
+              L'exemple ci-dessus est délimité par des pipes ('|'), il est également possible des les délimiter par des virgules.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+    </section>
+
+    <section id="appendix-settings-sect-profiles">
+      <title>Balise <varname>profiles</varname></title>
+
+      <para>La balise <sgmltag>profile</sgmltag> du fichier <filename>settings.xml</filename> est comparable à une version tronquée de la balise du même nom diponible dans un <filename>pom.xml</filename>.  
+      Elle contient des balises 
+      <sgmltag>activation</sgmltag>, <sgmltag>repositories</sgmltag>,
+      <sgmltag>pluginRepositories</sgmltag> et <sgmltag>properties</sgmltag>.
+      Cette balise <varname>profile</varname> ne peut inclure que ces quatres éléments car 
+      ils se préoccupent du système de construction dans son intégralité.</para>
+
+      <para>Si un profil est activé à partir des settings, ces valeurs surchargeront n'importe quels autres profils provenant 
+      qui matchent les identifiants des fichiers <acronym>POM</acronym> ou <filename>profiles.xml</filename>.</para>
+    </section>
+
+    <section id="appendix-settings-sect-activation">
+      <title>Balise <varname>activation</varname></title>
+
+      <para>Une <varname>activation</varname> est la clé d'un profil. 
+      Comme les profils du <acronym>POM</acronym>, 
+      la puissance d'un profil vient de sa capacité à modifier certaines des valeurs sous certaines conditions. 
+      Ces conditions sont indiindiquées qués dans la balise <varname>activation</varname>.</para>
+
+      <para><example>
+          <title>Balise activation du fichier settings.xml</title>
+
+          <programlisting language="xml">&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  ...
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;test&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;activeByDefault&gt;false&lt;/activeByDefault&gt;
+        &lt;jdk&gt;1.5&lt;/jdk&gt;
+        &lt;os&gt;
+          &lt;name&gt;Windows XP&lt;/name&gt;
+          &lt;family&gt;Windows&lt;/family&gt;
+          &lt;arch&gt;x86&lt;/arch&gt;
+          &lt;version&gt;5.1.2600&lt;/version&gt;
+        &lt;/os&gt;
+        &lt;property&gt;
+          &lt;name&gt;mavenVersion&lt;/name&gt;
+          &lt;value&gt;2.0.3&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;file&gt;
+          &lt;exists&gt;\${basedir}/file2.properties&lt;/exists&gt;
+          &lt;missing&gt;\${basedir}/file1.properties&lt;/missing&gt;
+        &lt;/file&gt;
+      &lt;/activation&gt;
+      ...
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+  ...
+&lt;/settings&gt;
+</programlisting>
+        </example></para>
+
+      <para>L'activation d'un profil se produit lorsque les critères définis ont été atteints.
+      Tous ne sont pas forcément nécessaires à en même temps.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>jdk</term>
+
+          <listitem>
+            <para>L'activation a une vérification centrée Java intégrée dans la balise <varname>jdk</varname>. 
+            Celui se déclenchera si le test est exécuté avec un numéro de version de JDK qui correspond au préfixe donné. 
+            Dans l'exemple ci-dessus, 1.5.0_06 correspondra.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>os</term>
+
+          <listitem>
+            <para>La balise <sgmltag>os</sgmltag> peut définir des propriétés spécifiques à un système d'exploitation.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>property</term>
+
+          <listitem>
+            <para>Le profile s'activera si Maven détecte la présence d'une certaine propriété 
+            (une valeur qui peut être référencée dans un POM par \${name}) qui correspond à une paire nom=valeur.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>file</term>
+
+          <listitem>
+            <para>Enfin, un nom de fichier donné peut activer le profil en fonction de l'existence d'un fichier.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para>La balise <sgmltag>activation</sgmltag> n'est pas le seul moyen d'activer un profil.
+      La balise <sgmltag>activeProfile</sgmltag> du fichier <filename>settings.xml</filename> peut contenir un id de profil.
+      Ils peuvent également être activés à partir de la ligne de commande en utilisant une liste séparée par virgules après un flag P
+      (Exemple : <varname>-P</varname> test).</para>
+
+      <para>Pour voir quels profils sont activés sur un build, utiliser le maven-help-plugin :</para>
+
+      <screen>mvn help:active-profiles
+</screen>
+    </section>
+
+    <section id="appendix-settings-sect-properties">
+      <title>Balise <varname>properties</varname></title>
+
+      <para>Les propriétés Maven permettent de définir des valeurs, comme celles des propriétés Ant. 
+      Leurs valeurs sont accessibles à partir de n'importe où dans un POM en utilisant la notation <varname>\${X}</varname>, où X est la propriété. 
+      Ils existe cinq styles différents de propriétés, qui sont tous disponibles à partir du fichier <varname>settings.xml</varname> :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term><literal>env.</literal><replaceable>X</replaceable></term>
+
+          <listitem>
+            <para>Préfixer une variable avec <literal>env.</literal> retournera
+            <indexterm>
+                <primary>env.* properties</primary>
+              </indexterm><indexterm>
+                <primary>variables d'environment</primary>
+              </indexterm>une variable d'environnement. Par exemple, <varname>\${env.PATH}</varname> contient la valeur de la variable d'environnement <varname>$path</varname>.
+            (<varname>%PATH%</varname> sous Windows.)</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>project.</literal><replaceable>x</replaceable></term>
+
+          <listitem>
+            <para>Ce genre de propriété contiendra
+            <indexterm>
+                <primary>project.* properties</primary>
+              </indexterm><indexterm>
+                <primary>POM (Project Object Model)</primary>
+
+                <secondary>référencement des propriétés</secondary>
+              </indexterm><indexterm>
+                <primary>pom.xml file</primary>
+
+                <secondary>référencement des propriétés</secondary>
+              </indexterm>la valeur de l'élément correspondant du <acronym>POM</acronym>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><literal>settings.</literal><replaceable>x</replaceable></term>
+
+          <listitem>
+            <para>Permet de référencer <indexterm>
+                <primary>settings.* properties</primary>
+              </indexterm><indexterm>
+                <primary>fichier settings.xml</primary>
+
+                <secondary>propriétés dans</secondary>
+
+                <tertiary>referencing</tertiary>
+              </indexterm>un élément du fichier <filename>settings.xml</filename>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Propriétés systèmes Java</term>
+
+          <listitem>
+            <para>Toutes les propriétés disponibles <indexterm>
+                <primary>propriété systèmes, références</primary>
+              </indexterm><indexterm>
+                <primary>Propriétés systèmes Java, références</primary>
+              </indexterm>
+            via la méthode <methodname>java.lang.System.getProperties()</methodname> sont accessibles comme propriété de <acronym>POM</acronym>
+            (Exemple : <varname>\${java.home}</varname>).</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><replaceable>x</replaceable></term>
+
+          <listitem>
+            <para>Affecté avec la balise <literal>properties</literal> ou un par l'intermédiaire d'un fichier externe, 
+            cet valeur peut être utilisée comme <varname role="keep-together">\${someVar}</varname>.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para><example>
+          <title>Affecter la propriété \${user.install} à partir du fichier settings.xml</title>
+
+          <programlisting language="xml">&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  ...
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      ...
+      &lt;properties&gt;
+        &lt;user.install&gt;\${user.dir}/our-project&lt;/user.install&gt;
+      &lt;/properties&gt;
+      ...
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+  ...
+&lt;/settings&gt;
+</programlisting>
+        </example></para>
+
+      <para>La propriété <varname>\${user.install}</varname> est accessible dans un 
+      <acronym>POM</acronym> si ce profil est activé.</para>
+    </section>
+
+    <section id="appendix-settings-sect-settings-repository">
+      <title>Balise <varname>repositories</varname></title>
+
+      <para>Les dépôts sont des collections distantes de projets utilisables par Maven pour remplir le dépôt local du système de build. 
+      C'est à partir de ce dépôt local que Maven appelle ses plugins et ses dépendances. 
+      Différents dépôts distants peuvent contenir des projets, et en fonction du profil actif, on peut les utiliser pour rechercher une certaine release ou un snapshot d'un artefact.</para>
+
+      <para><example>
+          <title>Configuration des dépôts à partir du fichier settings.xml</title>
+
+          <programlisting language="xml">&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  ...
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      ...
+      &lt;repositories&gt;
+        &lt;repository&gt;
+          &lt;id&gt;codehausSnapshots&lt;/id&gt;
+          &lt;name&gt;Codehaus Snapshots&lt;/name&gt;
+          &lt;releases&gt;
+            &lt;enabled&gt;false&lt;/enabled&gt;
+            &lt;updatePolicy&gt;always&lt;/updatePolicy&gt;
+            &lt;checksumPolicy&gt;warn&lt;/checksumPolicy&gt;
+          &lt;/releases&gt;
+          &lt;snapshots&gt;
+            &lt;enabled&gt;true&lt;/enabled&gt;
+            &lt;updatePolicy&gt;never&lt;/updatePolicy&gt;
+            &lt;checksumPolicy&gt;fail&lt;/checksumPolicy&gt;
+          &lt;/snapshots&gt;
+          &lt;url&gt;http://snapshots.maven.codehaus.org/maven2&lt;/url&gt;
+          &lt;layout&gt;default&lt;/layout&gt;
+        &lt;/repository&gt;
+      &lt;/repositories&gt;
+      &lt;pluginRepositories&gt;
+        ...
+      &lt;/pluginRepositories&gt;
+      ...
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+  ...
+&lt;/settings&gt;
+</programlisting>
+        </example></para>
+
+      <para><variablelist>
+          <varlistentry>
+            <term>releases, snapshots</term>
+
+            <listitem>
+              <para>Ce sont les policy pour chaque type d'artefact, release ou snapshot. 
+              Avec ces deux ensembles, un pom a le pouvoir de modifier les policy de chaque type au sein d'un référentiel unique. 
+              Un peut décider d'activer seulement le téléchargement de snapshots, par exemple à des fins de développement.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>enabled</term>
+
+            <listitem>
+              <para><varname>true</varname> ou <varname>false</varname>, permet de savoir si un dépôt est activé pour un certain type 
+              (releases ou snapshots).</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>updatePolicy</term>
+
+            <listitem>
+              <para>Cet élément spécifie la fréquence des mises à jour. 
+              Maven va comparer les timestamp des <acronym>POM</acronym>s locaux avec les <acronym>POM</acronym>s distants.
+              Les choix possibles sont :
+              <varname>always</varname>, <varname>daily</varname> (par défaut),
+              <varname>interval:X</varname> (où X représente un nombre de minute)
+              ou <varname>never</varname>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>checksumPolicy</term>
+
+            <listitem>
+              <para>Lorsque Maven déploie des fichiers dans le dépôt, il déploie également les fichiers checksum correspondants.
+              Plusieurs options sont disponibles lorsqu'un checksum est manquant ou invalide :
+              <varname>ignore</varname>, <varname>fail</varname> ou
+              <varname>warn</varname>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>layout</term>
+
+            <listitem>
+              <para>Dans la description des dépôts ci-dessus, il est mentionné que tous les dépôts suivent un layout commun. 
+              Maven 2 a un layout par défaut pour ses dépôts, Maven 1.x en avait un différent. 
+              Utilisez cet élément pour préciser lesquels sont par défaut ou legacy. 
+              Si vous êtes passé de Maven 1 à Maven 2 et que vous souhaitez utiliser le même dépôt, renseignez celui-ci comme
+              <varname>legacy</varname>.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+    </section>
+
+    <section id="appendix-settings-sect-plugin-repositories">
+      <title>Balise <varname>pluginRepositories</varname></title>
+
+      <para>La structure de la balise <sgmltag>pluginRepositories</sgmltag> est similaire à celle de la balise <sgmltag>repositories</sgmltag>. 
+      Les balises <sgmltag>pluginRepositories</sgmltag> spécifient un emplacement distant où l'on peut trouver des artefacts de plugins Maven.</para>
+
+      <example>
+        <title>pluginRepositories dans le fichier settings.xml</title>
+
+        <programlisting>&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  ...
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      ...
+      &lt;repositories&gt;
+        ...
+      &lt;/repositories&gt;
+      &lt;pluginRepositories&gt;
+        &lt;pluginRepository&gt;
+          &lt;id&gt;codehausSnapshots&lt;/id&gt;
+          &lt;name&gt;Codehaus Snapshots&lt;/name&gt;
+          &lt;releases&gt;
+            &lt;enabled&gt;false&lt;/enabled&gt;
+            &lt;updatePolicy&gt;always&lt;/updatePolicy&gt;
+            &lt;checksumPolicy&gt;warn&lt;/checksumPolicy&gt;
+          &lt;/releases&gt;
+          &lt;snapshots&gt;
+            &lt;enabled&gt;true&lt;/enabled&gt;
+            &lt;updatePolicy&gt;never&lt;/updatePolicy&gt;
+            &lt;checksumPolicy&gt;fail&lt;/checksumPolicy&gt;
+          &lt;/snapshots&gt;
+          &lt;url&gt;http://snapshots.maven.codehaus.org/maven2&lt;/url&gt;
+          &lt;layout&gt;default&lt;/layout&gt;
+        &lt;/pluginRepository&gt;
+      &lt;/pluginRepositories&gt;
+      ...
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+  ...
+&lt;/settings&gt;
+</programlisting>
+      </example>
+    </section>
+
+    <section id="appendix-settings-sect-active-profiles">
+      <title>Balise <varname>activeProfiles</varname></title>
+
+      <para><example>
+          <title>Activer des profiles à partir du fichier settings.xml</title>
+
+          <programlisting language="xml">&lt;settings xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+  ...
+  &lt;activeProfiles&gt;
+    &lt;activeProfile&gt;env-test&lt;/activeProfile&gt;
+  &lt;/activeProfiles&gt;
+&lt;/settings&gt;
+</programlisting>
+        </example></para>
+
+      <para>La dernière pièce du puzzle du <filename>settings.xml</filename> est la balise <sgmltag>activeProfiles</sgmltag>. 
+      Elle contient un ensemble de balises <sgmltag>activeProfile</sgmltag>, qui ont chacun pour valeur un id de profil. 
+      Tout profil dont l'id est présente dans une balise <sgmltag>activeProfile</sgmltag> sera activé, quels que soient les paramètres d'environnement. 
+      Si aucun profil n'est trouvé, rien ne se passera. 
+      Par exemple, si <varname>env-test</varname> est un <sgmltag>activeProfile</sgmltag>, un <sgmltag>profile</sgmltag> dans un <filename>pom.xml</filename> 
+      (ou <filename>profile.xml</filename>) sera activé. 
+      Si aucun profil n'est trouvé, l'exécution se poursuivra tout de même normalement.</para>
+    </section>
+
+    <section id="appendix-settings-sect-encrypting-passwords">
+      <title>Chiffrement des mots de passe dans les Settings Maven</title>
+
+      <para>Si vous utilisez Maven pour déployer vos artefacts sur des dépôts distants ou tout autre service distant nécessitant l'utilisation de mots de passe,
+      la meilleure solution est de stocker ces mots de passe dans vos Settings Maven. 
+      Sans un mécanisme pour chiffrer ces mots de passe, le fichier <filename>~/.m2/settings.xml</filename> devient rapidement une faille de sécurité, car il contient les mots de passe en clair d'accès à vos différents serveurs.
+      Pour éviter ce problème, Maven 2.1 a introduit une fonctionnalité qui permet de chiffrer vos mots de passe. 
+      Pour ce faire, vous devez commencer par créer un mot de passe maître et stocker celui-ci dans un fichier de <filename>security-settings.xml</filename> à l'emplacement <filename>~/.m2/settings-security.xml</filename>. 
+      Vous pouvez ensuite utiliser ce dernier pour chiffrer vos autres mots de passe, ceux que vous deviez stocker en clair dans vos Settings Maven (<filename>~/.m2/settings.xml</filename>).</para>
+
+      <para>Pour illustrer cette fonctionnalité, regardons le processus utilisé par Maven pour récupérer le mot de passe non chiffré d'un serveur
+      à partir des paramètres Maven d'un utilisateur. La <xref linkend="fig-settings-unencrypted" /> présente ce processus. 
+      Un utilisateur peut faire référence à un serveur en utilisant un identifiant dans le <varname>POM</varname> d'un projet, Maven recherche alors le serveur correspondant dans ses settings. 
+      Une fois trouvé, Maven utilisera le mot de passe associé à celui-ci. 
+      Le mot de passe est stocké en clair dans <filename>~/.m2/settings.xml</filename>, 
+      il est donc facilement accessible à toute personne qui dispose des droits de lecture sur ce fichier.</para>
+      
+      <figure id="fig-settings-unencrypted">
+        <title>Stockage de mot de passe non crypté dans les Settings Maven</title>
+
+        <mediaobject>
+          <imageobject role="web">
+            <imagedata fileref="figs/web/settings_password-no-encryption.png" />
+          </imageobject>
+
+          <imageobject role="print">
+            <imagedata fileref="figs/print/settings_password-no-encryption.pdf" />
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>Maintenant, regardons comment Maven utilise des mots de passe chiffrés. La <xref linkend="fig-settings-encrypted" /> présente ce processus.</para>
+
+      <figure id="fig-settings-encrypted">
+        <title>Stockage d'un mot de passe crypté dans les Settings Maven</title>
+
+        <mediaobject>
+          <imageobject role="web">
+            <imagedata fileref="figs/web/settings_password-encryption.png" />
+          </imageobject>
+
+          <imageobject role="print">
+            <imagedata fileref="figs/print/settings_password-encryption.pdf" />
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <para>Pour configurer la fonctionnalité de chiffrage des mots de passe, créez le mot de passe maître en exécutant l'une des commandes 
+      <command>mvn -emp</command> ou <command>mvn
+      --encrypt-master-password</command> suivi par votre mot de passe maître.</para>
+
+      <screen>$ <command>mvn -emp mypassword</command>
+{rsB56BJcqoEHZqEZ0R1VR4TIspmODx1Ln8/PVvsgaGw=}</screen>
+
+      <para>Maven affiche alors une copie de la version chiffrée du mot de passe sur la sortie stantard. 
+      Copiez celui-ci et collez-le dans le fichier <filename>~/.m2/settings-security.xml</filename> comme le montre l'exemple suivant.</para>
+
+      <example id="ex-settings-master-password">
+        <title>settings-security.xml avec un mot de passe maître</title>
+
+        <programlisting>&lt;settingsSecurity&gt;
+  &lt;master&gt;{rsB56BJcqoEHZqEZ0R1VR4TIspmODx1Ln8/PVvsgaGw=}&lt;/master&gt;
+&lt;/settingsSecurity&gt;
+</programlisting>
+      </example>
+
+      <para>Après avoir créé le mot de passe maître, vous pouvez commencer à chiffrer vos mots de passe pour les utiliser dans vos settings.
+      Pour chiffrer un mot de passe à l'aide du mot de passe maître, utilisez l'une des commande <command>mvn -ep</command> ou <command>mvn --encrypt-password</command>. 
+      Imaginons que vous disposez d'un gestionnaire de dépôt et que vous avez besoin d'un utilisateur "deployment" et d'un mot de passe "qualityFIRST" pour vous y connecter.  
+      Pour chiffrer ce mot de passe, utilisez la ligne de commande suivante :</para>
+
+      <screen>$ <command>mvn -ep qualityFIRST</command>
+{uMrbEOEf/VQHnc0W2X49Qab75j9LSTwiM3mg2LCrOzI=}</screen>
+
+      <para>Copiez ensuite le mot de passe chiffré affiché sur la sortie standard et collez-le dans vos settings Maven.</para>
+
+      <example>
+        <title>Stocker un mot de passe encrypté dans les Settings Maven (~/.m2/settings.xml)</title>
+
+        <programlisting>&lt;settings&gt;
+  &lt;servers&gt;
+    &lt;server&gt;
+      &lt;id&gt;nexus&lt;/id&gt;
+      &lt;username&gt;deployment&lt;/username&gt;
+      &lt;password&gt;{uMrbEOEf/VQHnc0W2X49Qab75j9LSTwiM3mg2LCrOzI=}&lt;/password&gt;
+    &lt;/server&gt;
+  &lt;/servers&gt;
+  ...
+&lt;/settings&gt;</programlisting>
+      </example>
+
+      <para>Lorsque vous exécutez un build Maven qui a besoin d'interagir avec le gestionnaire de repository, 
+      Maven récupérera le mot de passe principal à partir du fichier <filename>~/.m2/settings-security.xml</filename> 
+      et utilisera celui-ci pour déchiffrer le mot de passe stocké dans votre fichier <filename>~/.m2/settings.xml</filename>. 
+      Maven utilisera ce mot de passe déchiffré pour se connecter au serveur.</para>
+
+      <para>Quels en sont les bénéfices d'un tel mécanisme ? 
+      Il vous permet d'éviter de stocker en clair vos mots de passe dans le fichier <filename>~/.m2/settings.xml</filename>. 
+      Notez que cette fonctionnalité ne prévoit pas le chiffrage du mot de passe lors de l'envoi de celui-ci sur le serveur distant. 
+      Il est toujours possible, pour une personne mal intentionnée, de récupérer vos mots de passe en analysant les flux réseau.</para>
+
+      <para>Pour encore plus de sécurité, vous pouvez demander à vos développeurs de stocker le mot de passe maître chiffré sur un périphérique de stockage amovible comme un disque dur USB. 
+      En utilisant cette méthode, un développeur doit brancher son disque amovible sur sa station de travail lorsqu'il veut effectuer un déploiement ou une quelconque interaction avec un serveur distant. 
+      Pour cela, votre fichier <filename>~/.m2/settings-security.xml</filename> doit contenir une référence vers l'emplacement réel de votre fichier <filename>settings-security.xml</filename>.
+      Cette configuration passe par l'utilisation de la balise <varname>relocation</varname>.</para>
+      
+      <example>
+        <title>Configuration de la balise <varname>relocation</varname> du mot de passe maître</title>
+
+        <programlisting>&lt;settingsSecurity&gt;
+  &lt;relocation&gt;/Volumes/usb-key/settings-security.xml&lt;/relocation&gt;
+&lt;/settingsSecurity&gt;
+</programlisting>
+      </example>
+
+      <para>Ainsi, le développeur peut stocker son fichier 
+      <filename>settings-security.xml</filename> sur son emplacement personnalisé
+      <filename>/Volumes/usb-key/settings-security.xml</filename> et s'arranger pour que ce fichier ne soit 
+      disponible que s'il est assis devant sa station de travail.</para>
+    </section>
+  </section>
+</appendix>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+ 	<class name="com.sonatype.workout.model.Exercise" table="exercises">
+ 	 	<id column="id" name="id" type="integer">
+ 	 		<generator class="native"/>
+ 	 	</id>
+ 	 	<property column="name" name="name" type="string"/>
+ 	 	<many-to-one name="type" column="exercise_type_id" class="com.sonatype.workout.model.ExerciseType"/>
+ 	</class>
+</hibernate-mapping>

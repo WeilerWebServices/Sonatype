@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ ~ Copyright (c) 2010, 2013 Sonatype, Inc.
+ ~ All rights reserved. This program and the accompanying materials
+ ~ are made available under the terms of the Eclipse Public License v1.0
+ ~ which accompanies this distribution, and is available at
+ ~ http://www.eclipse.org/legal/epl-v10.html
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.sonatype.sisu.inject</groupId>
+    <artifactId>registries</artifactId>
+    <version>2.4.0-SNAPSHOT</version>
+  </parent>
+
+  <packaging>bundle</packaging>
+
+  <groupId>org.sonatype.sisu</groupId>
+  <artifactId>sisu-eclipse-registry</artifactId>
+
+  <name>Sisu-Eclipse-Registry : Extension bindings</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.eclipse.equinox</groupId>
+      <artifactId>org.eclipse.equinox.registry</artifactId>
+      <version>3.5.0.v20100503</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>
+              org.sonatype.inject.eclipse
+            </Bundle-SymbolicName>
+            <Fragment-Host>
+              org.sonatype.inject
+            </Fragment-Host>
+            <Export-Package />
+            <Require-Bundle>org.eclipse.equinox.registry</Require-Bundle>
+            <Private-Package>
+              org.sonatype.guice.eclipse.*
+            </Private-Package>
+            <Import-Package>
+              <!-- available via Fragment-Host/Require-Bundle -->
+              !com.google.*|org.sonatype.*|org.eclipse.*,*
+            </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -1,0 +1,172 @@
+[[rhc]]
+== Repository Health Check
+
+{inall}
+
+Repository Health Check is a feature of {pro} and {oss} that integrates data from the {ds}.
+
+Repository Health Check provides access to a limited subset of the available data right in your repository 
+manager. The {ds} expose information about the components, including license, vulnerability, and other statistics 
+such as relative usage popularity and age.
+
+Repository Health Check analyzes all components found in a proxy repository of any supported format. Repository 
+formats currently supported are NuGet, npm, and Maven2.
+
+Availability of component information varies depending on the format and is constantly improved via updates to 
+the {ds}.
+
+[[rhc-config]]
+=== Configuring Repository Health Check
+
+==== Configuration Per Repository
+
+Repository health check can be setup for any repository, as long as the
+following apply:
+
+* The Repository 'Type' is 'Proxy'.
+* The Repository 'Policy' is *not* 'Snapshot'.
+* The Repository is 'In Service'.
+
+Repository health check for a single repository can be enabled in one of two 
+ways. The quickest way is to simply click the 'Analyze' button. After pressing 
+this button, you will be prompted to either analyze all or only the selected 
+repository.
+
+Alternatively, you can select the repository in the list of repositories and
+then set the 'Enabled' configuration in the 'Health Check' tab to 'true' as
+displayed in <<fig-rhc-enabled>>. Administrator privileges are required to
+perform this configuration.
+
+[[fig-rhc-enabled]]
+.Enabling Repository Health Check
+image::figs/web/rhc-enable-analyze.png[scale=50]
+
+NOTE: After enabling Repository Health Check for the first time you will be
+presented with an acceptance of the Terms of Service.
+
+Once enabled, a scheduled task that performs the initial analysis is created and started. This task uses the
+identifier of the repository and the prefix 'Health Check:' as a name and is configured to run regularly. New
+component infomation is supplied by the {ds} to {nxrm} daily. The recurrence frequency can be
+changed in the scheduled task administration described in <<scheduled-tasks>>. Disabling health check for a
+specific repository removes this scheduled task automatically.
+
+After a successful analysis, the 'Health Check' column in the list of
+repositories will display security and license issue counts for the
+repository. An example is displayed in <<fig-rhc-repo-list-quality>>. 
+
+[[fig-rhc-repo-list-quality]]
+.The Repositories List with Health Check Result Counts
+image::figs/web/rhc-repo-list.png[scale=50]
+
+Hovering your mouse pointer over that value will display the
+'Repository Health Check' summary data in a pop-up window. A sample
+window is displayed in <<fig-rhc-summary-pop-up>>.
+
+[[fig-rhc-summary-pop-up]]
+.A Result Summary for a Repository Health Check
+image::figs/web/rhc-summary-report.png[scale=40]
+
+At the bottom of the pop-up window, you find the button 'View Detailed Report' to access the detailed report. It
+will show up in another tab in the main area of the user interface.
+
+==== Global Configuration
+
+Alternatively to enabling and disabling health check for each
+repository, you can enable health check globally. This can be achieved
+by creating and configuring a new capability called 'Health Check:
+Configuration'. Details about managing capabilities can be found in
+<<capabilities>>. 
+
+The health check configuration capability allows you to enable and
+disable it with the 'Enabled' checkbox and set up health check for all proxy
+repositories by enabling 'Configure for all proxy repositories'. With
+this configuration, health check will be enabled for all existing proxy
+repositories. Any newly created proxy repository will automatically
+have health check enabled as well.
+
+NOTE: When disabling the global configuration option, if you also have the Repositories tab open, be sure to
+refresh the user interface to avoid viewing older data.
+
+[[rhc-details]]
+=== Accessing the Detailed Repository Health Check Report
+
+{inrmonly}
+
+The detailed report contains the same overview data and charts for
+security and license information at the top displayed in
+<<fig-rhc-detail-summary>> .
+
+[[fig-rhc-detail-summary]]
+.Summary of the Detailed Repository Health Check Panel
+image::figs/web/rhc-detail-summary.png[scale=50]
+
+Below this overview, as visible in <<fig-rhc-detail-security-list>>, a drop-down for security and license 
+information allows you to toggle between two lists displaying further details. Select 'View By: Vulnerabilities' 
+to inspect the security issues and 'View By: Artifacts' to review the license information. Both lists have a 
+filter for each column at the bottom of the list that allows you to narrow down the number of rows in the table 
+and find specific entries easily.
+
+The security list as visible in <<fig-rhc-detail-security-list>>
+contains columns for 'Threat Level', 'Problem Code' and the GAV parameters
+identifying the affected component. The 'Problem Code' column is a link
+to the security warning referenced and commonly links a specific entry
+in
+http://cve.mitre.org[the Common Vulnerabilities and Exposures] list.
+This database has descriptive text on vulnerabilities
+and further information with reference links.
+
+[[fig-rhc-detail-security-list]]
+.The Security Data in the Detailed Repository Health Check Report
+image::figs/web/rhc-detail-security-list.png[scale=45]
+
+The 'Threat Level' is rated in values used by the vulnerability
+databases and ranges from 0 for a low threat to 10 for the highest
+threat. 'Critical' values (noted in red) range from 8 to 10. 'Severe' 
+values (noted in orange) range from 4-7, and 'Moderate' values 
+(noted in yellow) range from 1 to 3.
+
+The license list as visible in <<fig-rhc-detail-license-list>> shows a derived threat in the 'License Threat' 
+column. The 'Declared License' column details the license information found in POM file. The 'Observed Licenses 
+in Source' columns lists all the licenses found in the actual source code of the library in the form of file 
+headers and license files. This data is based on source code scanning performed and provided by the {ds}. The
+next columns for the GAV parameters allow you to identify the component. The last column 'Security Issues' 
+displays an indicator for potentially existing security issue for the same component.
+
+[[fig-rhc-detail-license-list]]
+.The License Data in the Detailed Repository Health Check Report
+image::figs/web/rhc-detail-license-list.png[scale=45]
+
+Licenses such as GPL-2.0 or GPL-3.0 are classified as the highest
+'License Threat' and labeled as 'Copyleft' and use red as signaling color. 
+
+A 'Non-Standard' or 'Not Provided' license is classified as a moderate
+threat and uses orange. 'Non-Standard' as a classification is triggered
+by the usage of atypical licenses for open source software such as
+http://charityware.info/[CharityWare license], http://en.wikipedia.org/wiki/Beerware[BeerWare],
+http://en.wikipedia.org/wiki/University_of_Illinois/NCSA_Open_Source_License[NCSA
+Open Source License] and many others. 'Not Provided' is trigged as
+classification if no license information was found anywhere.
+
+Licenses such as CDDL-1.0, EPL-1.0 or GPL-2.0-CPE receive a 'Weak
+Copyleft' classification and yellow as notification color.
+
+'Liberal' licenses that are generally friendly to inclusion in
+commercial products use blue and include licenses such as
+Apache-2.0, MIT or BSD.
+
+A general description about the implications of the different licenses is available when hovering over the 
+specific category in the 'License Analysis Summary'. Further information about the different licenses can be 
+obtained from the http://opensource.org/licenses[Open Source Initiative]. Mixed license scenarios like a mixture 
+of licenses such as Apache-1.1, Apache-2.0, LGPL and LGPL-2.1 can be complicated to assess in its impact and 
+might be legally invalid depending on the combination of licenses observed.  Detailed implications to your 
+business and software are best discussed with your lawyers.
+
+{pro} reports all components in the local storage of the respective repository in the detail panel. This means
+that at some stage a build running against your repository manager required these components and caused a download
+of them to local storage.
+
+To determine which project and build caused this download to be able
+to fix the offending dependency by upgrading to a newer version or
+removing it with an alternative solution with a more suitable license,
+you will have to investigate all your projects.
+

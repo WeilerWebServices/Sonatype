@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target name="org.sonatype.m2e.guice">
+<locations>
+<location path="${project_loc:/org.sonatype.m2e.guice}/target/platform" type="Directory"/>
+<location path="${eclipse_home}" type="Profile"/>
+</locations>
+</target>

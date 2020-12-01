@@ -1,0 +1,27 @@
+<decorators defaultdir="/decorators">
+	<!-- SiteMesh Decorator Mappings:
+	See http://opensymphony.com/sitemesh/dm.html
+	 -->
+
+	<!-- No decorator -->
+    <excludes>
+		<pattern>*.html</pattern>
+	</excludes>
+	
+	<decorator name="main" page="main.vm">
+		<url-pattern>/exercises.s</url-pattern>
+	</decorator>
+	
+<!-- <decorator name="authoring" page="authoring.ftd">
+		<url-pattern>/page/create*</url-pattern>
+		<url-pattern>/page/edit*</url-pattern>
+		<url-pattern>/article/create*</url-pattern>
+		<url-pattern>/article/edit*</url-pattern>
+	</decorator>
+	
+	<decorator name="popup" page="popup.ftd">
+		<url-pattern>/page/wikihelp*</url-pattern>
+		<url-pattern>/page/help*</url-pattern>
+	</decorator> -->
+	
+</decorators>

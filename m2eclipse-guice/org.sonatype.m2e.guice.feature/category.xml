@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://sisu.sonatype.org/site">
+      Guice Integration for Eclipse
+   </description>
+   <feature url="features/org.sonatype.m2e.guice.feature_0.0.0.jar"
+             id="org.sonatype.m2e.guice.feature" version="0.0.0">
+      <category name="guice"/>
+   </feature>
+   <category-def name="guice" label="Guice Integration for Eclipse"/>
+</site>

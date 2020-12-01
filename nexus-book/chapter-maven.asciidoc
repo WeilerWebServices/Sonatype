@@ -1,0 +1,699 @@
+[[config]]
+== Maven and Other Build Tools
+
+{inall}
+
+[[config-sect-intro]]
+=== Introduction
+
+Historically {pro} and {oss} started as a repository manager supporting the Maven repository format. While it
+supports many other repository formats now, the Maven repository format is still the most common and well
+supported format for build and provisioning tools running on the JVM and beyond.
+
+This chapter shows example configurations for using the repository manager with Apache Maven and a number of other
+tools. The setups take advantage of merging many repositories and exposing them via a repository group. Setting
+this up is documented in the chapter in addition to the configuration used by specific tools.
+
+
+[[config-maven]]
+=== Apache Maven
+
+To use {pro} and {oss} with http://maven.apache.org/[Apache Maven], we configure Maven to check the repository
+manager instead of the default, built-in connection to the Central Repository.
+
+To do this, you add a +mirror+ configuration and override the default
+configuration for the +central+ repository in your +~/.m2/settings.xml+
+as shown in <<ex-maven-nexus-simple>>.
+
+[[ex-maven-nexus-simple]]
+.Configuring Maven to Use a Single Repository Group
+----
+<settings>
+  <mirrors>
+    <mirror>
+      <!--This sends everything else to /public -->
+      <id>nexus</id>
+      <mirrorOf>*</mirrorOf>
+      <url>http://localhost:8081/nexus/content/groups/public</url>
+    </mirror>
+  </mirrors>
+  <profiles>
+    <profile>
+      <id>nexus</id>
+      <!--Enable snapshots for the built in central repo to direct -->
+      <!--all requests to nexus via the mirror -->
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>http://central</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+      </repositories>
+     <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>http://central</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <!--make the profile active all the time -->
+    <activeProfile>nexus</activeProfile>
+  </activeProfiles>
+</settings>
+----
+
+In <<ex-maven-nexus-simple>>, we have defined a single profile called +nexus+. It configures a +repository+ and a
++pluginRepository+ with the id +central+ that overrides the same repositories in the super pom. The super pom is
+internal to every Apache Maven install and establishes default values. These overrides are important since they
+change the repositories by enabling snapshots and replacing the URL with a bogus URL. This URL is overridden by
+the +mirror+ setting in the same settings.xml file to point to the URL of your single repository group. This group
+can, therefore, contain release as well as snapshot components and Maven will pick them up.
+
+The +mirrorOf+ pattern of +*+ causes any repository request to be
+redirected to this mirror and to your single repository group, which
+in the example is the +public+ group.
+
+It is possible to use other patterns in the mirrorOf field. A possible
+valuable setting is to use +external:*+. This matches all repositories
+except those using +localhost+ or file based repositories. This is
+used in conjunction with a repository manager when you want to exclude
+redirecting repositories that are defined for integration testing. The
+integration test runs for Apache Maven itself require this setting.
+
+More documentation about mirror settings can be found in the
+http://maven.apache.org/guides/mini/guide-mirror-settings.html[mini
+guide on the Maven web site].
+
+As a last configuration the +nexus+ profile is listed as an active
+profile in the +activeProfiles+ element.
+
+[[config-sect-custom]]  
+=== Adding Repositories for Missing Dependencies
+
+If you've configured your Maven +settings.xml+ or other build tool configuration to use the +public+ repository
+group as a mirror for all repositories, you might encounter projects that are unable to retrieve components from
+your local repository manager installation.
+
+This usually happens because you are trying to build a project that
+has defined a custom set of repositories and snapshot repositories or
+relies on the content of other publically available repositories in
+its configuration. When you encounter such a project all you have to
+do is 
+
+* add this repository to your repository manager as a new proxy repository 
+* and then add the new proxy repository to the public group.
+
+The advantage of this approach is that no configuration change on the
+build tool side is necessary at all.
+
+[[config-sect-new-repo]]
+=== Adding a New Repository
+
+To add a repository, log in as an administrator, and click on the 'Repositories' link in the left-hand navigation
+menu in the 'Views/Repositories' section as displayed in <<fig-repository-manager-add-repository-dropdown>>.
+
+Clicking on this link should bring up a window that lists all the configured repositories. You'll then want to
+create a new proxy repository. To do this, click on the 'Add' link that is directly above the list of
+repositories. When you click the 'Add' button, click the down arrow directly to the right of the word 'Add', this
+will show a drop-down which has the options: 'Hosted Repository', 'Proxy Repository', 'Virtual Repository', and
+'Repository Group'. Since you are creating a proxy repository, click on 'Proxy Repository'.
+
+[[fig-repository-manager-add-repository-dropdown]]
+.Creating a New Proxy Repository
+image::figs/web/repository-manager_add-repository-dropdown.png[scale=50]
+
+Once you do this, you will see a screen resembling
+<<fig-add-repo>>. Populate the required fields 'Repository ID' and the
+'Repository Name'. The 'Repository ID' will be part of the URL used to
+access the repository, so it is recommended to avoid characters that
+could cause problems there or on the filesystem storage. It is best to
+stick with lowercase alphanumerics. Set the 'Repository Policy' to
+'Release', and the 'Remote Storage Location' to the public URL of the
+repository you want to proxy.
+
+
+[[fig-add-repo]]
+.Configuring a Proxy Repository
+image::figs/web/repository-manager_add-repository.png[scale=50]
+
+Once you've filled out this screen, click on the 'Save' button. The repository manager is now configured to proxy
+the repository. If the remote repository contains snapshots as well as release components, you will need to repeat
+the process creating a second proxy repository and setting the policy to 'Snapshots'.
+
+ifdef::promo[]
+++++
+<?dbhtml-include href="promo_nuget.html"?>
+++++
+endif::[]
+
+[[config-sect-repo-group]]  
+=== Adding a Repository to a Group
+
+Next you will need to add the new repositories to the 'Public Repositories' repository group. To do this, click on
+the 'Repositories' link in the left-hand main menu in the 'Views/Repositories' section. The repository manager
+lists Groups and Repositories in the same list so click on the public group.  After clicking on the 'Public
+Repositories' group, you should see the 'Browse' and 'Configuration' tabs in the lower half of the user interface.
+
+NOTE: If you click on a repository or a group in the 'Repositories' list
+and you do not see the 'Configuration' tab, this is because your 
+user account does not have administrative privileges. To perform the
+configuration tasks outlined in this chapter, you will need to be
+logged in as a user with administrative privileges.
+
+Clicking on the 'Configuration' tab will bring up a screen which looks
+like <<fig-add-to-group>>.
+
+[[fig-add-to-group]]
+.Adding New Repositories to a Repository Group
+image::figs/web/repository-manager_add-to-group.png[scale=50]
+
+To add the new repository to the public group, find the repository in
+the  'Available Repositories' list on the right, click on the
+repository you want to add and drag it to the left to the 'Ordered
+Group Repositories' list. Once the repository is in the 'Ordered Group
+Repositories' list you can click and drag the repository within that
+list to alter the order in which a repository will be searched for a
+matching component.
+
+NOTE: The repository manager user interface makes use of the Javascript widget library
+ http://extjs.com/[ExtJS]. ExtJS provides for a number of UI widgets that allow for rich interaction like the
+ drag-drop UI for adding repositories to a group and reordering the contents of a group.
+
+In the last few sections, you learned how to add a new custom
+repositories to a build in order to download components that are not
+available in the Central Repository.
+
+If you were not using a repository manager, you would have added these repositories to the repository element of
+your project's POM, or you would have asked all of your developers to modify +~/.m2/settings.xml+ to reference two
+new repositories. Instead, you used the repository manager to add the two repositories to the public group. If all
+of the developers are configured to point to the public repository group, you can freely swap in new repositories
+without asking your developers to change local configuration, and you've gained a certain amount of control over
+which repositories are made available to your development team. In addition the performance of the component
+resolving across multiple repositories will be handled by repository manager and therefore be much faster than
+client side resolution done by Maven each time.
+
+
+[[ant-ivy]]
+=== Apache Ant and Apache Ivy
+
+http://ant.apache.org/ivy/[Apache Ivy] is a dependency manager often used in Apache Ant builds. It supports the
+Maven repository format and can be configured to download dependencies that can be declared in the +ivy.xml+
+file. This configuration can be contained in the +ivysettings.xml+. A minimal example for resolving dependencies
+from a repository manager running on +localhost+ is shown in <<ivysettings-minimal>>.
+
+[[ivysettings-minimal]]
+.Minimal Apache Ivy Settings
+----
+<ivysettings>
+  <settings defaultResolver="nexus"/>
+  <property name="nexus-public"
+                   value="http://localhost:8081/nexus/content/groups/public"/>
+  <resolvers>
+      <ibiblio name="nexus" m2compatible="true" root="${nexus-public}"/>
+    </resolvers>
+</ivysettings>
+----
+
+These minimal settings allow the +ivy:retrieve+ task to download the declared
+dependencies.
+
+To deploy build outputs to a repository with the +ivy:publish+ task, user credentials and the URL of the target
+repository have to be added to +ivysettings.xml+ and the makepom and publish tasks have to be configured and
+invoked.
+
+Full example projects can be found in the +ant-ivy+ folder of the
+https://github.com/sonatype/nexus-book-examples[documentation examples project]. A full build of the
++simple-project+, including downloading the declared dependencies and uploading the build output to the repository
+manager can be invoked with
+
+----
+cd ant-ivy/simple-project
+ant deploy
+----
+
+Further details about using these example projects can be found in <<eval>>.
+
+
+[[ant-aether]]
+=== Apache Ant and Eclipse Aether
+
+http://www.eclipse.org/aether/[Eclipse Aether] is the dependency
+management component used in Apache Maven 3+. The project provides Ant
+tasks that can be configured to download dependencies that can be
+declared in +pom.xml+ file or in the Ant build file directly.
+
+This configuration can be contained in your Ant +build.xml+ or a separate file that is imported. A minimal example
+for resolving dependencies from a repository manager running on +localhost+ is shown in <<aether-minimal>>.
+
+[[aether-minimal]]
+.Minimal Setup for Aether Ant Tasks
+----
+<project xmlns:aether="antlib:org.eclipse.aether.ant" ....>
+  <taskdef uri="antlib:org.eclipse.aether.ant" 
+      resource="org/eclipse/aether/ant/antlib.xml">
+    <classpath>
+      <fileset dir="${aether.basedir}" 
+                   includes="aether-ant-tasks-*.jar" />
+    </classpath>
+  </taskdef>
+  <aether:mirror id="mirror" 
+     url="http://localhost:8081/nexus/content/groups/public/" 
+     mirrorOf="*"/>
+...
+</project>
+----
+
+
+These minimal settings allow the +aether:resolve+ task to download the declared dependencies.
+
+To deploy build outputs to a repository with the +aether:deploy+ task, user authentication and details about the
+target repositories have to be added .
+
+Full example projects can be found in the +ant-aether+ folder of the
+https://github.com/sonatype/nexus-book-examples[documentation examples project]. A full build of the
++simple-project+, including downloading the declared dependencies and uploading the build output to Nexus can be
+invoked with
+
+----
+cd ant-aether/simple-project
+ant deploy
+----
+
+Further details about using these example projects can be found in <<eval>>.
+
+
+[[gradle]]
+=== Gradle
+
+http://www.gradle.org/[Gradle] has a built in dependency management component that supports
+the Maven repository format. In order to configure a Gradle project to
+resolve +dependencies+ declared in +build.gradle+ file, a +maven+
+repository as shown in <<gradle-minimal>> has to be declared
+
+
+[[gradle-minimal]]
+.Minimal Gradle Setup
+----
+repositories {
+    maven {
+        url "http://localhost:8081/nexus/content/groups/public"
+    }
+}
+----
+
+These minimal settings allow Gradle to download the declared
+dependencies.
+
+The above setup is specific to each project. Alternatively an +init.gradle+ file placed e.g., in +~/.gradle+ can
+establish the repository as the source for dependencies in all projects. A simple implementation could look
+like
+
+----
+allprojects {
+  ext.RepoConfigurator = {
+    maven { 
+      url = uri('http://localhost:8081/nexus/content/groups/public') }
+  }
+  buildscript.repositories RepoConfigurator
+  repositories RepoConfigurator
+----
+
+Other setup could be an expansion of the following example allowing file system based repostories:
+
+----
+/**
+ * init.gradle file for development using the Nexus Repository Manager as proxy repository
+ * 
+ * @author Manfred Moser <manfred@simpligility.com>
+ */
+
+apply plugin:NexusRepositoryPlugin
+
+class NexusRepositoryPlugin implements Plugin<Gradle> {
+
+  final static String LOG_PREFIX = "init.gradle/NexusRepositoryPlugin:"
+
+  final Closure NexusConfig = {
+    maven {
+      name = 'standard-nexus'
+      url = 'http://localhost:8081/nexus/content/groups/public'
+    }
+    // if required you can add further repositories or groups here 
+    // and they will be left intact if the name starts with standard-
+    // although it is better to just add those repositories in Nexus 
+    // and expose them via the public group
+  }
+
+  final Closure RepoHandler = {
+    all { ArtifactRepository repo ->
+      if (repo.name.toString().startsWith("standard-") ) {
+         println "$LOG_PREFIX $repo.name at $repo.url activated as repository."
+      } else {
+        if (repo instanceof MavenArtifactRepository) {
+          remove repo
+          println "$LOG_PREFIX $repo.name at $repo.url removed."
+        } else {
+          println "$LOG_PREFIX $repo.name kept (not a Maven repository)."
+        }
+      }
+    }
+  }
+
+          
+  void apply(Gradle gradle) {
+    // Override all project specified Maven repos with standard 
+    // defined in here
+    gradle.allprojects{ project ->
+      println "$LOG_PREFIX  Reconfiguring repositories."
+      project.repositories RepoHandler
+      project.buildscript.repositories RepoHandler
+
+      project.repositories NexusConfig
+      project.buildscript.repositories NexusConfig
+    }
+  }
+}
+----
+
+Gradle init scripts can be much more powerful and customized and are
+explained with more examples in the
+http://gradle.org/docs/current/userguide/init_scripts.html[official
+Gradle documentation].
+
+To deploy build outputs to a repository with the +uploadArchives+
+task, user authentication can be declared in e.g.,
++gradle.properties+:
+
+----
+nexusUrl=http://localhost:8081/nexus
+nexusUsername=admin
+nexusPassword=admin123
+----
+
+and then used in the `uploadArchives` task with a `mavenDeployer`
+configuration from the Maven plugin:
+
+----
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      repository(
+        url: "${nexusUrl}/content/repositories/releases") {
+          authentication(userName: nexusUsername, password: nexusPassword)
+      }
+      snapshotRepository(
+        url: "${nexusUrl}/content/repositories/snapshots") {
+          authentication(userName: nexusUsername, password: nexusPassword)
+      }
+    }
+  }
+}
+----
+
+
+Full example projects can be found in the +gradle+ folder of the
+https://github.com/sonatype/nexus-book-examples[documentation examples project]. A full build of the
++simple-project+, including downloading the declared dependencies and uploading the build output to repository
+manager can be invoked with
+
+----
+cd gradle/simple-project
+gradle upload
+----
+
+Further details about using these example projects can be found in <<eval>>.
+
+
+////
+
+[[gant]]
+=== Gant
+
+is just groovy wrapper for ant.. ant and ant ivy applies
+
+[[grails]]
+=== Grails
+
+add the grails and grails plugins repos.. 
+config grails build to look at nexus
+////
+
+
+[[sbt]]
+=== SBT
+
+http://www.scala-sbt.org/[sbt] has a built in dependency management
+component and defaults to the Maven repository format. In order to
+configure a sbt project to resolve dependencies declared in
++build.sbt+ file, a +resolver+  as shown in
+<<sbt-minimal>> has to be declared
+
+
+[[sbt-minimal]]
+.Minimal SBT Configuration
+----
+resolvers += "Nexus" at "http://localhost:8081/nexus/content/groups/public"
+----
+
+These minimal settings allow sbt to download the declared dependencies.
+
+To deploy build outputs to a Nexus repository with the +publish+
+task, user credentials can be declared in the +build.sbt+ file:
+
+[subs="attributes"]
+----
+credentials += Credentials("Sonatype {nxrm}",
+"nexus.scala-tools.org", "admin", "admin123")
+----
+
+TIP: The credentials string should never change, as third-party clients depend on it
+
+And then used in the +publishTo+ configuration:
+
+----
+publishTo <<= version { v: String =>
+  val nexus = "http://localhost:8081/nexus/" 
+  if (v.trim.endsWith("SNAPSHOT"))
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases" at nexus + "content/repositories/releases")
+----
+
+Further documentation can be found in the
+http://www.scala-sbt.org/release/docs/Publishing.html[sbt
+documentation on publishing].
+
+
+[[leiningen]]
+=== Leiningen
+
+http://leiningen.org/[Leiningen] has a built in dependency management
+component and defaults to the Maven repository format. As a build tool
+it is mostly used for projects using the http://clojure.org/[Clojure]
+language. Many libraries useful for these projects are published to
+the Clojars repository.
+
+If you want use Nexus with Leiningen, first create *two* new Maven 2 proxy
+repositories in Nexus with the remote URL +http://clojars.org/repo/+. 
+One of these should have the +Repository Policy+ set to +Release+ and the
+other should have policy +Snapshot+. Then add both to your Maven 2 public group.
+
+In order to configure a Leinigen project to resolve dependencies declared in
+the +project.clj+ file, a +mirrors+ section overriding the built in +central+
+and +clojars+ repositories as shown in <<leiningen-minimal>> has to be declared.
+
+
+[[leiningen-minimal]]
+.Minimal Leiningen Configuration
+----
+:mirrors {
+  "central" {
+    :name "Nexus"
+    :url "http://localhost:8081/nexus/content/groups/public"
+    :repo-manager true
+  }
+  #"clojars" {
+    :name "Nexus"
+    :url "http://localhost:8081/nexus/content/groups/public"
+    :repo-manager true}
+  }
+----
+
+These minimal settings allow Leiningen to download the declared
+dependencies.
+
+To deploy build outputs to a Nexus repository with the +deploy+
+command, the target repositories have to be add to +project.clj+ as
++deploy-repositories+. This avoids Leiningen checking for dependencies
+in these repositories, which is not necessary, since they are already
+part of the Nexus +public+ repository group used in +mirrors+.
+
+----
+  :deploy-repositories [
+    ["snapshots" 
+      "http://localhost:8081/nexus/content/repositories/snapshots"]
+    ["releases" 
+      "http://localhost:8081/nexus/content/repositories/releases"]
+  ]
+----
+
+User credentials can be declared in +~/.lein/credentials.clj.gpg+ or
+will be prompted for.
+
+Further documentation can be found on the http://leiningen.org/[Leiningen website].
+
+[[Jenkins]]
+=== Jenkins
+
+link:http://jenkins-ci.org/[Jenkins] is a powerful and widely used open source continuous integration server providing development teams with a reliable way to monitor changes in source control and trigger a variety of builds. 
+
+[[jenkins-plugin-install]]
+==== Installation
+
+{nxrm} for Jenkins is distributed as a Hudson plugin package (+.hpi+ file) and is available for link:http://download.sonatype.com/nexus/ci/latest.hpi[download from Sonatype Support]. 
+
+To install {nxrm} for Jenkins, perform the following steps:
+
+. Login to Jenkins as an administrator.
+. Select 'Manage Jenkins' from the Dashboard's left-navigation menu.
+. Select 'Manage Plugins' from the list of configuration options.
+. Click the 'Advanced' tab on the 'Plugin Manager' screen.
+. In the 'Upload Plugin' section, click 'Choose File', open the .hpi file, and then click 'Upload'. 
+
+[[fig-nexus-jenkins-plugin-upload]]
+.{nxrm} for Jenkins Upload
+image::figs/web/jenkins-plugin-upload.png[scale=60]
+
+[[jenkins-plugin-global-config]]
+==== Global Configuration
+
+Use the following instructions to configure Jenkins to connect to {nxrm}:
+
+. Select 'Manage Jenkins' from the Dashboard's left-navigation menu.
+. Select 'Configure System' from the list of configuration options.
+. In the 'Sonatype Nexus' section, click the 'Add {nxrm} Server' dropdown menu and then select '{nxrm} 2.x Server'. Enter the following:
+* *Display Name*: Name of the server you want shown when selecting {nxrm} instances for build jobs.
+* *Server ID*: A unique ID used to reference {nxrm} in Build Pipeline scripts. It should be alphanumeric without spaces.
+* *Server URL*: Location of your {nxrm} server.
+* *Credentials*: Select the 'Add' button to enter your {nxrm} username and password using the 'Jenkins Provider Credentials: Jenkins' modal window. Once added, select your {nxrm} username and password from the 'Credentials' dropdown list.
+. Click the 'Test Connection' button.
+. After a successful connection to {nxrm}, click the 'Save' button.
+
+[[fig-nexus-jenkins-global-config]]
+.{nxrm} for Jenkins Global Configuration
+image::figs/web/jenkins-configure-plugin.png[scale=45]
+
+
+[[jenkins-plugin-tool-config]]
+
+==== Tool Configuration (Optional)
+
+NOTE: {nxrm} for Jenkins can upload artifacts to a Maven repository without a Maven installation, however the examples provided in this section use Maven to build in a project. A Maven installation must be configured in Jenkins for these examples to work.
+
+To configure a Maven installation: 
+
+. Select 'Manage Jenkins' from the left-navigation menu.
+. Select 'Global Tool Configuration' from the list of configuration options.
+. In the 'Maven' section, click the 'Maven Installations...' button.
+. Configure a Maven installation. An example configuration is shown in <<fig-nexus-jenkins-tool-config>>:
++
+[[fig-nexus-jenkins-tool-config]]
+.Nexus Jenkins Tool Configuration
+image::figs/web/jenkins-tool-config.png[scale=45]
+
+[[nexus-jenkins-job-config]]
+==== Job Configuration
+
+After a completed installation and global configuration of Jenkins, you are ready to configure a build-step invocation as part of a specific job.
+
+===== Freestyle Build Step Configuration
+
+The freestyle build job is a flexible and configurable option, and can be used for any type of project.
+
+. To start, create a freestyle project by clicking the 'New Item' link on the Jenkins Dashboard. Give the project a name and click 'OK' to continue with the configuration.
+. In the 'Build' section of the configuration screen, click the 'Add Build Step' dropdown button and then select '{nxrm} Publisher'. Enter the following parameters:
+* *Nexus Instance*: Select the display name set in <<jenkins-plugin-global-config, global configuration>>.
+* *Nexus Repository*: Select a repository that has release repository policy and allows for artifact uploads.
+* *Packages*: Select packages to publish to {nxrm} during your freestyle build. For this example, use the 'Add Package' dropdown to select a 'Maven' Package. 
++
+[[fig-nexus-jenkins-freestyle-config]]
+.Nexus Jenkins Plugin Freestyle Build Configuration
+image::figs/web/jenkins-freestyle-build-step.png[scale=45]
++
+[start=4]
+. Complete your freestyle build as desired and click 'Save'.
+. Launch a build for your project. When the build completes, you will see output similar to <<fig-nexus-jenkins-freestyle-output>>:
++
+[[fig-nexus-jenkins-freestyle-output]]
+.Nexus Jenkins Plugin Freestyle Build Output
+image::figs/web/jenkins-freestyle-build-output.png[scale=45]
++
+In {nxrm}, any artifact selected in 'Packages' will be available in the selected repository. In <<fig-nexus-jenkins-freestyle-repo>>, the Jenkins war is now available in the 'Releases' repository:
++
+[[fig-nexus-jenkins-freestyle-repo]]
+.Jenkins war in Release Repo
+image::figs/web/jenkins-freestyle-release-repo.png[scale=45]
+
+===== Pipeline Build Step Configuration
+
+Pipeline builds allow for precise control and configuration over your build process. 
+
+. To start, create a pipeline project by clicking the 'New Item' link on the Jenkins Dashboard. Give the project a name and click 'OK' to continue with the configuration.
++
+NOTE: Pipeline jobs allow you to configure the job via a Groovy script. The script is editable in the 'Pipeline' section. In this example we will use the sample 'Github + Maven' script.
++
+. In the 'Pipeline' section of the configuration screen, click the 'try sample Pipeline' dropdown, and then select 'Github + Maven'.
++
+[[fig-nexus-jenkins-sample-script]]
+.Sample Pipeline
+image::figs/web/jenkins-pipeline-sample-script.png[scale=60]
++
+. Below the Results stage, add a new placeholder {nxrm} Publish stage to the build pipeline script.
++
+
+----
+
+stage('Publish') {
+
+}
+
+----
++ 
+TIP: The {nxrm} Publisher build step should occur after the build so the binaries are available for upload. For best reporting during the build process, the publish step should exist in its own stage below the Results stage.
+
+[start=5]
+. Click the 'Pipeline Syntax' link located below the Script textbox.
+. In the 'Steps' section of the 'Snippet Generator' window, select the following:
+* *Sample Step*: Select 'NexusPublisher: {nxrm} Publisher'.
+* *Nexus Instance*: Select the display name set in <<jenkins-plugin-global-config, global configuration>>.
+* *Nexus Repository*: Select a repository that has release repository policy and allows for artifact uploads.
+* *Packages*: Select packages to publish to {nxrm} during your pipeline build. For this example, use the 'Add Package' dropdown to select a 'Maven' Package. 
+
+[[fig-nexus-jenkins-pipeline-steps]]
+.Pipeline Sample Script
+image::figs/web/jenkins-pipeline-steps.png[scale=45]
+
+[start=6]
+. Click the 'Generate Pipeline Script' button. An example pipeline script is shown below:
+
+----
+
+nexusPublisher nexusInstanceId: 'localNexus', nexusRepositoryId: 'releases', packages: [[$class: 'MavenPackage', mavenAssetList: [[classifier: '', extension: '', filePath: 'war/target/jenkins.war']], mavenCoordinate: [artifactId: 'jenkins-war', groupId: 'org.jenkins-ci.main', packaging: 'war', version: '2.23']]]
+
+----
+
+[start=7]
+. Copy the generated script and paste it into the previously added publish stage of your pipeline script.
+. Complete your pipeline build as desired and click 'Save'.
+. Launch a build for your project.
+
+In {nxrm}, any artifact selected in 'Packages' will be available in the selected repository. In <<fig-nexus-jenkins-pipeline-repo>>, the Jenkins war is now available in the 'Releases' repository:
+
+[[fig-nexus-jenkins-pipeline-repo]]
+.Jenkins War in Release Repo
+image::figs/web/jenkins-pipeline-release-repo.png[scale=45]

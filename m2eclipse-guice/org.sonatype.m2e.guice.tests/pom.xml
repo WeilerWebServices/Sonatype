@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.sonatype.m2e.guice</groupId>
+    <artifactId>org.sonatype.m2e.guice.parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <packaging>eclipse-test-plugin</packaging>
+  <artifactId>org.sonatype.m2e.guice.tests</artifactId>
+  <name>Guice Integration for Eclipse (tests)</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.sonatype.m2e.guice</groupId>
+      <artifactId>org.sonatype.m2e.guice</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.sonatype.tycho</groupId>
+        <artifactId>maven-osgi-test-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <configuration>
+<!--
+          <useUIHarness>true</useUIHarness>
+-->
+          <argLine>${tycho.test.args}</argLine>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>sun-jvm</id>
+      <activation>
+        <property>
+          <name>java.vendor.url</name>
+          <value>http://java.sun.com/</value>
+        </property>
+      </activation>
+      <properties>
+        <tycho.test.args>-Xmx800m -XX:MaxPermSize=256m</tycho.test.args>
+      </properties>
+    </profile>
+    <profile>
+      <id>osx</id>
+      <activation>
+        <property>
+          <name>java.vendor.url</name>
+          <value>http://www.apple.com/</value>
+        </property>
+      </activation>
+      <properties>
+        <tycho.test.args>-Xmx800m -XX:MaxPermSize=256m -Dosgi.ws=cocoa -XstartOnFirstThread</tycho.test.args>
+        <osgi.ws>cocoa</osgi.ws>
+      </properties>
+    </profile>
+  </profiles>
+
+</project>

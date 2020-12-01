@@ -1,0 +1,1077 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="profiles">
+  <title>Build-Profile</title>
+
+  <section id="profiles-sect-what">
+    <title>Wozu sind sie nützlich?</title>
+
+    <para>Profile erlauben einen bestimmten Build auf eine bestimmte Umgebung
+    abzustimmen, Profile schaffen Portabilität zwischen verschiedenen Build
+    Umgebungen.</para>
+
+    <para>Was meinen wir mit unterschiedlichen Build-Umgebungen? Zwei
+    Beispiele von unterschiedlichen Build Umgebungen sind die Umgebungen von
+    Test und Produktion. Solange Sie in einer Entwicklungs-Umgebung arbeiten,
+    mag Ihr System so konfiguriert sein, dass es von einer lokalen
+    Entwicklungsdatenbank liest, während in der Produktion ihr System so
+    konfiguriert ist, dass dieses von der produktiven Datenbank liest. Maven
+    erlaubt Ihnen beliebig viele Build Environments zu definieren (Build
+    Profiles) welche jegliche Einstellung der
+    <filename>pom.xml</filename>-Datei übersteuern können. Sie können somit
+    Ihre Anwendung im "Entwicklungsprofil" so konfigurieren, dass diese von
+    der Entwicklungsdatenbank liest, und mittels einem "Produktionsprofil" in
+    der Produktion auf die Produktionsdatenbank zeigen lassen. Profile können
+    darüber hinaus von der jeweiligen Umgebung oder der Plattform aktiviert
+    werden, Sie können Ihren Build so anpassen, dass dieser abhängig von der
+    Betriebssystemumgebung oder der Version des installierten JDK sich
+    unterschiedlich verhält. Vor wir aber näher in die Details der Benutzung
+    und Konfiguration von Maven Build Profilen eingehen, sollten wir zunächst
+    das Konzept der Build Portabilität definieren.</para>
+
+    <section id="profiles-sect-portability">
+      <title>Was genau bedeutet Build Portabilität</title>
+
+      <para>Die "Protabilität" eines Builds ist ein Mass dessen, wie einfach
+      es ist, ein bestimmtes Projekt in einer anderen Umgebung zu
+      erstellen/builden. Ein Build, welcher ohne spezielle Konfiguration oder
+      Anpassung von Property Dateien auskommt, ist portabler als ein Build,
+      welcher viel Aufwand benötigt um von Grund auf erstellt zu werden. Die
+      portabelsten Builds sind für gewöhnlich verbreitete Open Source Projekte
+      wie zum Beispiel Apache Commons aus Apache Velocity, welches mit Maven
+      Builds versehen ist, welche keine oder nur geringfügige Anpassungen
+      benötigen. Einfach ausgedrückt, portable Builds funktionieren einfach,
+      so wie sie daher kommen, wohingegen weniger portable Builds von Ihnen
+      abverlangen, dass Sie sich strecken - alle Plattform abhängigen Pfade
+      und Build Tools einstellen. Vor den Details, wie ein Build tatsächlich
+      portabel konfigurierbar wird, werden wir nun zunächst die verschiedenen
+      Arten der Portabilität von welcher wir sprechen werden ansehen.</para>
+
+      <section id="profiles-sect-non-portable">
+        <title>Nicht protierbare Builds</title>
+
+        <para>Die Absesenheit von Portierbarkeit ist genau der Grund weshalb
+        Build Tools eingesetzt werden - um dies zu verhindern. Dennoch, jedes
+        Werkzeug kann dazu missbraucht werden (sogar Maven) einen nicht
+        portierbaren Build zu erstellen. Ein nicht portierbarer Build ist ein
+        Build welcher nur unter ganz besonderen Umständen und Kriterien
+        funktioniert (z.B. auf Ihrer lokalen Maschine). Ausser in dem Fall
+        dass Sie ganz alleine für sich arbeiten, und Sie keinerlei Pläne haben
+        jemals zu einer anderen Maschine zu deployen, ist es am besten
+        Non-Portabilität von vornherein auszuschliessen. Ein nicht portabler
+        Build läuft nur auf einer Maschine und ist sozusagen ein Einzelstück.
+        Maven ist darauf ausgelegt nicht portablen Builds entgegenzuwirken, es
+        bietet daher die Möglichkeit Builds mittels Build Profilen
+        anzupassen.</para>
+
+        <para>Immer wenn ein neuer Entwicker die Quellen eines nicht portablen
+        Buildes bekommt, ist dieser gezwungen einen Grossteil der
+        Build-Skripte anzupassen um den Build erstellen zu können.</para>
+      </section>
+
+      <section id="profiles-sect-environment-portability">
+        <title>Environment Portabilität</title>
+
+        <para>Ein Build ist Umgebungsportabel, wenn dieser Mechanismen
+        bereitstellt, um Verhalten und Konfiguration abhängig von Umgebungen
+        zu definieren. Ein Projekt, welches zum Beispiel in der Test-Umgebung
+        eine Referenz auf eine Test-Datenbank, sowie in der Produktion eine
+        Referenz auf eine produktive Datenbank aufweisst, ist
+        Umgebungsportabel. Es ist warscheinlich, dass ein solcher Build eine
+        Anzahl Properties abhängig von der Umgebung setzt. Sobald Sie in eine
+        andere Umgebung wechseln, oder aber in eine Umgebung welche noch nicht
+        definiert ist, oder noch kein Build Profil erstellt wurde, so wird das
+        Projekt nicht funktionieren. Schliesslich besteht Portabilität nur
+        zwischen definierten Umgebungen.</para>
+
+        <para>Sobald ein neuer Entwickler die Quellen eines umgebungsportablen
+        Projektes bekommt, muss dieser den Build in einer definierten Umgebung
+        ablaufen lassen, oder aber eine solche Umgebung
+        erstellen/definieren.</para>
+      </section>
+
+      <section id="profiles-sect-org-portability">
+        <title>Organisationsweite (In-House) Portabilität</title>
+
+        <para>Diese Art der Portabilität dreht sich um Projektanforderungen,
+        dass nur wenige Mitarbeiter auf bestimmte interne Ressourcen wie z.B.
+        Source Code Control oder das interne Maven Repository Zugriff haben.
+        ein Projekt einer grossen Unternehmung mag z.B. von einer internen
+        Datenbank abhängig sein, welche nur in-Haus Entwicklern zugänglich
+        ist, oder ein Open Source Projekt mag bestimmte Zugriffsberechtigungen
+        benötigen, um das Ergebnis eines Builds auf einer Webseite oder einem
+        öffentlich zugänglichen Repository zu veröffentlichen.</para>
+
+        <para>Sollten Sie versuchen ein in-Haus Projekt ausserhalb dieser
+        Umgebung von Grund auf zu erstellen (z.B. ausserhalb des
+        Unternehmens), so wird dieser Build nicht erfolgreich zum Ziel kommen.
+        Dies mag darauf zurückzuführen sein, dass bestimmte Plugins nicht zur
+        Verfügung stehen, oder bestimmte Abhängigkeiten können nicht erfüllt
+        werden, bestimmt Zugrifsberechtigungen mögen allenfalls nicht
+        bestehen, oder der Zugriff auf interne Ressourcen verwehrt sein. Ein
+        solches Projekt ist nur innerhalb der Umgebungen einer Organisation
+        portabel.</para>
+      </section>
+
+      <section id="profiles-sect-wide-portability">
+        <title>Universelle Portabilität</title>
+
+        <para>Jerdermann mag die Quellen eines universell portables Projektes
+        herunterladen und ausführen ohne den Build auf eine bestimmte Umgebung
+        anzupassen. Dies ist die höchste Stufe der Portabilität; alles
+        darunter erfordert zusätzlichen Auwand für denjenigen der das Projekt
+        erstellen möchte. Diese Art der Portabilität ist insbesondere für Open
+        Source Projekte wichtig, da diese davon abhängig sind, dass eventuelle
+        Mitwirkende das Projekt einfach herunterladen und ausführen
+        können.</para>
+
+        <para>Jeder Entwickler könnte die Quellen eines universell portablen
+        Projektes herunterladen und ausführen.</para>
+      </section>
+    </section>
+
+    <section id="profiles-sect-select-level">
+      <title>Auswahl eines geeigneten Mass der Portabilität</title>
+
+      <para>Es ist ganz offensichtlich, Sie werden alles daran setzen, die
+      niederste Stufe zu vermeiden: den nicht portablen Build. Vielleicht
+      hatten Sie auch bereits die zweifelhafte Ehre in einer Organisation zu
+      Lernen oder Arbeiten, welche eine kritische Anwendung betrieben hat, der
+      ein nicht portabler Build zugrunde lag. In solchen Organisationen können
+      Sie eine Anwendung nicht ohne die Hilfe einer bestimmten Person oder dem
+      Einsatz eines bestimmten Servers erstellen. Desweiteren ist es in
+      solchen Organisationen schwierig weitergehende Abhängigkeiten
+      einzuführen oder zu verändern, ohne die zuständige Person welche den
+      nicht portablen Build unterhält zu konsultieren. Nicht portable Builds
+      entstehen häufig in politisierenden Organisationen, immer dann wenn es
+      wichtig erscheint, dass eine Person oder Gruppe die Macht über die
+      Kontrolle des Wie und Wann eines Projekt Builds hat. "Wie kann diese
+      Anwedung gebuildet werden? - Oh, da müssen wir Hans fragen, niemand
+      sonst kann in die Produktion verteilen!". eine höchst gefährliche
+      Situation, welche zudem häufiger vorkommt, als Sie es sich vorstellen
+      mögen. Sollten Sie für eine solche Organisation arbeiten,so wird Maven
+      und insbesondere werden Maven Profile Ihnen helfen diese Situation zu
+      überkommen.</para>
+
+      <para>Das andere Ende der Portabilitätsskala ist die universelle
+      Portabilität. Universell portierbare Builds gehören im Allgemeinen zu
+      den am schwierigsten zu erreichenden Zielen. Solcherlei Builds
+      beschränken die Auswahl ihrer Abhängigkeiten auf Projekte und Werkzeuge
+      welche frei verfügbar und öffentlich zugänglich sind. Viele kommerzielle
+      Angebote müssen von der Liste der Möglichen ausgeschlossen werden, da
+      sie voraussetzen, dass einer bestimmten Lizenz zugestimmt wurde. Breite
+      Portabilität schränkt auch den Raum der Abhängigkeiten ein welche Teil
+      eines Maven Artefakts sein können. Ein Beispiel: sollten Sie von Oracle
+      <acronym>JDBC</acronym> Treibern abhängig sein, so werden Ihre Kunden
+      diese seperat herunterladen und installieren müssen. Das ist nicht mehr
+      universell portable, denn Sie sind gezwungen eine Beschreibung zu
+      liefern wie die Umgebung aufgebaut und angepasst werden muss um das
+      Projekt zu erstellen. Andererseits ist es möglich, dass Sie auf
+      <acronym>JDBC</acronym> Treiber zurückgreifen, welche in den
+      öffentlichen Maven Repositorien vorhanden sind, wie zum Beispiel
+      <productname>MySQL</productname> oder
+      <productname>HSQLDB</productname>.</para>
+
+      <para>Wie zuvor erwähnt hat Open Source Software den grössten Nutzen von
+      universeller Portabilität. Breit abgestütze Builds reduzieren die
+      Ineffizienzen welche mit der freien Mitarbeit in einem Projekt verbunden
+      sind. Ein Open Source Projekt hat zwei gut abgegrenzte Benutzergruppen:
+      Endbenutzer und Entwickler. Sobald Benutzer ein Projekt wie zum Beispiel
+      Maven benutzen, und sich entscheiden einen Patch beizusteuern, so müssen
+      sie die Wandlung durchmachen vom Nutzer eines Builds zum Ersteller eines
+      Builds. Sie müssen zunächst einmal zu einem Entwickler werden. Abhängig
+      wie schwierig es ist einen Build zu verstehen ist dies eine Hürde welche
+      den benutzer davon abhalten mag, einen Patch beizusteuern. Mit einem
+      universell portierbaren Projekt muss sich ein Benutzer nicht mit
+      obskuren Anweisungen herumschlagen um zum Entwickler zu mutieren, der
+      Benutzer kann die Quellen herunterladen, verändern und die Erweiterung
+      einreichen, ohne sich mit jemanden in Verbindung zu setzen um zunächst
+      in die Lage zu kommen das Environment zu erstellen. Fällt die Barriere
+      um einen Patch zu erstellen, so werden Sie feststellen, dass die Anzahl
+      der Beiträge, insbesondere der sporadischen Beiträge, steigt, diese
+      wiederum sind oftmals das Zünglein an der Waage ob ein Projekt ein
+      Erfolg oder Misserfolg wird. Eine der Nebenwirkungen der Anwendung von
+      Maven in einer Grosszahl verschiedener Open Source Projekte ist, dass es
+      für viele Entwickler wesentlich einfacher wurde beizusteuern und
+      mitzuarbeiten.</para>
+    </section>
+  </section>
+
+  <section id="profiles-sect-maven-profiles">
+    <title>Portabilität mittels Maven Profilen</title>
+
+    <para>Ein Maven Profil ist eine Zusammenfassung alternativer
+    Konfigurationsparameter welche gesetzt oder übersteuert werden. Mittels
+    einem Profil können Sie einen Build für unterschiedliche Umgebungen
+    erstellen. Profile werden innerhalb der <filename>pom.xml</filename>-Datei
+    erstellt, und bekommen dort auch einen Bezeichner. Danach können Sie Maven
+    mit einem Befehlszeilenparameter aufrufen, in welchem Sie definieren mit
+    welchem Profil die zugehörigen Goals abgearbeitet werden sollen. Die
+    nachfolgende <filename>pom.xml</filename>-Datei definiert ein Profil
+    <varname>production</varname> um die standard Compiler-Einstellungen zu
+    übersteuern.</para>
+
+    <example>
+      <title>Einsatz eines Maven Profils um die produktiven Einstellungen der
+      Compiler Settings zu übersteuern</title>
+
+      <programlisting language="xml">&lt;project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                      http://maven.apache.org/maven-v4_0_0.xsd"&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;org.sonatype.mavenbook&lt;/groupId&gt;
+  &lt;artifactId&gt;simple&lt;/artifactId&gt;
+  &lt;packaging&gt;jar&lt;/packaging&gt;
+  &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+  &lt;name&gt;simple&lt;/name&gt;
+  &lt;url&gt;http://maven.apache.org&lt;/url&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;junit&lt;/groupId&gt;
+      &lt;artifactId&gt;junit&lt;/artifactId&gt;
+      &lt;version&gt;3.8.1&lt;/version&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+  &lt;profiles&gt;<co id="coDef-profiles-compile-1"
+          linkends="coRef-profiles-compile-1" />
+    &lt;profile&gt;
+      &lt;id&gt;production&lt;/id&gt;<co id="coDef-profiles-compile-2"
+          linkends="coRef-profiles-compile-2" />
+      &lt;build&gt;<co id="coDef-profiles-compile-3"
+          linkends="coDef-profiles-compile-3" />
+        &lt;plugins&gt;
+          &lt;plugin&gt;
+            &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+            &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+            &lt;configuration&gt;
+              &lt;debug&gt;false&lt;/debug&gt;<co
+          id="coDef-profiles-compile-4" linkends="coDef-profiles-compile-4" />
+              &lt;optimize&gt;true&lt;/optimize&gt;
+            &lt;/configuration&gt;
+          &lt;/plugin&gt;
+        &lt;/plugins&gt;
+      &lt;/build&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/project&gt;
+</programlisting>
+    </example>
+
+    <para>In diesem Beispiel haben wir ein Profil
+    <varname>production</varname> erstellt, welches die Standardeinstellungen
+    des Maven Compiler Plugin übersteuert. Lassen Sie uns nun die Syntax eines
+    Profils genauer ansehen:</para>
+
+    <calloutlist>
+      <callout arearefs="coDef-profiles-compile-1"
+               id="coRef-profiles-compile-1">
+        <para>Das Element <varname>profiles</varname> ist Teil der
+        <filename>pom.xml</filename>-Datei, es enthält ein oder mehrere
+        Profile. Da Profile bestehende Einstellungen einer
+        <filename>pom.xml</filename>-Datei übersteuern, kommt das Element
+        <varname>profiles</varname> gewöhnlich als letztes Element in einer
+        <filename>pom.xml</filename>-Datei.</para>
+      </callout>
+
+      <callout arearefs="coDef-profiles-compile-2"
+               id="coRef-profiles-compile-2">
+        <para>Jedes Profil benötigt ein Element <varname>id</varname>. dieses
+        Element enthält die Kennung welche benutzt wird, um das Profil von der
+        Befehlszeile aufzurufen. Ein Profil wird mittels dem Argument
+        <command>-P&lt;profile-id&gt;</command> an Maven übergeben.</para>
+      </callout>
+
+      <callout arearefs="coDef-profiles-compile-3"
+               id="coRef-profiles-compile-3">
+        <para>Ein Profil kann viele der Elemente welche innerhalb des Elements
+        <varname>project</varname> einer <filename>pom.xml</filename>-Datei
+        bestehen beinhalten. In diesem Beispiel übersteuern wir das
+        Standardverhalten des Compiler Plugin, hierzu müssen wir die Plugin
+        Konfiguration übersteuern, welche normalerweise im Element
+        <varname>plugins</varname> eines Builds gesetzt wird.</para>
+      </callout>
+
+      <callout arearefs="coDef-profiles-compile-4"
+               id="coRef-profiles-compile-4">
+        <para>Wir übersteuern die Konfiguration des Maven Compiler Plugin. Wir
+        stellen sicher, dass der Bytecode welcher im Profil
+        <varname>production</varname> erstellt wird keine Debug Informationen
+        enthält, und dass dieser Code durch die Optimierungsalgorithmen des
+        Compilers gegangen ist.</para>
+      </callout>
+    </calloutlist>
+
+    <para>Um <command>mvn install</command> unter dem Profil
+    <varname>production</varname> aufzurufen, müssen Sie das Argument
+    <command>-Pproduction</command> übergeben. Um zu überprüfen, dass das
+    Profil <varname>production</varname> die Standardeinstellungen des
+    Compilers übersteuert, rufen Sie Maven zusätzlich mit eingestellter
+    Debug-Ausgabe (<command>-X</command>) auf, wie im folgenden Abschnitt
+    dargestellt:</para>
+
+    <screen>~/examples/profile $ <command>mvn clean install -Pproduction -X</command>
+... (omitting debugging output) ...
+[DEBUG] Configuring mojo 'o.a.m.plugins:maven-compiler-plugin:2.0.2:testCompile'
+[DEBUG]   (f) basedir = ~\examples\profile
+[DEBUG]   (f) buildDirectory = ~\examples\profile\target
+...
+[DEBUG]   (f) compilerId = javac
+[DEBUG]   (f) <emphasis>debug = false</emphasis>
+[DEBUG]   (f) failOnError = true
+[DEBUG]   (f) fork = false
+[DEBUG]   (f) <emphasis>optimize = true</emphasis>
+[DEBUG]   (f) outputDirectory = \
+          ~\svnw\sonatype\examples\profile\target\test-classes
+[DEBUG]   (f) outputFileName = simple-1.0-SNAPSHOT
+[DEBUG]   (f) showDeprecation = false
+[DEBUG]   (f) showWarnings = false
+[DEBUG]   (f) staleMillis = 0
+[DEBUG]   (f) verbose = false
+[DEBUG] -- end configuration --
+... (omitting debugging output) ...
+</screen>
+
+    <para>Der Auszug aus der Debug-Ausgabe von Maven zeigt die eingesetzte
+    Konfiguration des Compiler Plugin unter dem Profil
+    <varname>production</varname>. Wie in der Ausgabe dargestellt ist die
+    Einstellung <varname>debug</varname> auf <varname>false</varname> und
+    <varname>optimize</varname> auf <varname>true</varname> gesetzt.</para>
+
+    <section id="profiles-sect-overriding-pom">
+      <title>Übersteuern eines Projekt Objekt Modelles</title>
+
+      <para>Während das vorangehende Beispiel aufzeigte wie Sie die
+      Standardeinstellungen eines einzelnen Maven Plugin übersteuern können,
+      so wissen Sie immer noch nicht, was genau Sie tatsächlich innerhalb
+      eines Maven Profil setzen können! Die kurze Antwort ist, beinahe alles
+      was Sie in einer <filename>pom.xml</filename>-Datei setzen können. Das
+      Maven <acronym>POM</acronym> beinhaltet ein Element
+      <varname>profiles</varname> als Teil des Elements
+      <varname>project</varname> welches die alternativen Konfigurationen
+      eines Projektes enthält. Innerhalb von diesem Element eingeschlossen
+      stehen Unterelemente <varname>profile</varname> welche die einzelnen
+      Profile definieren. Jedes Profil muss eine eindeutige
+      <varname>id</varname> haben, darüberhinaus kann es beinahe alle Elemente
+      beinhalten, welche man in einem Projekt erwarten würde. Das folgende
+      XML-Dokument zeigt alle erlaubten Elemente auf, welche ein Profil
+      übersteuern darf.</para>
+
+      <para><example>
+          <title>Erlaubte Elemente in einem Profil</title>
+
+          <programlisting language="xml">&lt;project&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;build&gt;
+        &lt;defaultGoal&gt;...&lt;/defaultGoal&gt;
+        &lt;finalName&gt;...&lt;/finalName&gt;
+        &lt;resources&gt;...&lt;/resources&gt;
+        &lt;testResources&gt;...&lt;/testResources&gt;
+        &lt;plugins&gt;...&lt;/plugins&gt;
+      &lt;/build&gt;
+      &lt;reporting&gt;...&lt;/reporting&gt;
+      &lt;modules&gt;...&lt;/modules&gt;
+      &lt;dependencies&gt;...&lt;/dependencies&gt;
+      &lt;dependencyManagement&gt;...&lt;/dependencyManagement&gt;
+      &lt;distributionManagement&gt;...&lt;/distributionManagement&gt;
+      &lt;repositories&gt;...&lt;/repositories&gt;
+      &lt;pluginRepositories&gt;...&lt;/pluginRepositories&gt;
+      &lt;properties&gt;...&lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/project&gt;
+</programlisting>
+        </example></para>
+
+      <para>In einem Profil kann man alle Elemente welche hier mit
+      Auslassungzeichen gekennzeichnet sind übersteuern. Ein Profil kann den
+      endgültigen Ausgabenamen eines Projektartefakten übersteuern,
+      Abhängigkeiten und das Verhalten des Projekt-Builds mittels der
+      Plugin-Konfiguration beeinflussen. Ein Profil kann auch die
+      Einstellungen der Verteilung profilabhängig definieren, so können Sie
+      zum Beispiel in einem Profil <varname>staging</varname> definieren das
+      der Artifakt auf einen Staging-Server verteilt wird und somit die
+      Einstellungen des Elements <varname>distributionManagement</varname>
+      übersteuert.</para>
+    </section>
+  </section>
+
+  <section id="profiles-sect-activation">
+    <title>Profil Aktivierung</title>
+
+    <para>Im vorangegangenen Abschnitt haben wir ausgeführt, wie man ein
+    Profil erstellt, welches das Standardverhalten einer bestimmten
+    Zielumgebung übersteuert. Im Vorangegangenen war der Standardbuild für die
+    Entwicklung ausgelegt, und das Profil <varname>production</varname> wurde
+    erstellt um eine Konfiguration für die produktive Umgebung
+    bereitzustellen. Was passiert, sollte man Anpassungen in Abhänigkeit von
+    bestimmten Variablen wie zum Beispiel der Betriebssystemumgebung, oder der
+    Version des <acronym>JDK</acronym> benötigen? Maven stellt eine
+    Möglichkeit bereit Profile zu "aktivieren", in Abhängigkeit zu bestimmten
+    Umgebungsvariablen einzustellen. Diese Funktionalität nennt sich
+    Profil-Aktivierung.</para>
+
+    <para>Nehmen wir einmal folgendes Beispiel: angenommen wir benutzen eine
+    Java Bibliothek welche auf eine Funktionalität aufsetzt, welche erst in
+    <acronym>JDK</acronym> Version 6 zur Verfügung steht: die Skripting Engine
+    wie in <ulink url="http://jcp.org/en/jsr/detail?id=223">JSR-223</ulink>
+    definiert. Sie haben den Teil der Bibliothek welcher mit der Skripting
+    Lösung zu tun hat in ein eigenes Maven Projekt abgetrennt; nun möchten Sie
+    erreichen, dass diejenigen, welche auf Java 5 aufsetzen das Gesamtprojekt
+    erstellen können ohne dabei die <productname>Java 6</productname>
+    abhängige Erweiterung zu erstellen. Sie können dies erreichen, indem Sie
+    ein Maven Profil erstellen, welches die Skripting Erweiterung lediglich im
+    Fall dass gegen <acronym>JDK</acronym> 6 gebuildet wird, hinzufügt. Lassen
+    Sie uns zunächst die Verzeichnisstruktur ansehen und erklären, wie wir uns
+    vorstellen, dass Entwickler das System erstellen sollen.</para>
+
+    <para>Sobald jemand <command>mvn install</command> auf einer Java 6
+    <acronym>JDK</acronym> Umgebung aufruft, möchten Sie, dass das Projekt
+    <varname>simple-script</varname> in den Build eingebunden wird. Unter Java
+    5 <acronym>JDK</acronym> Umgebungen soll dieses Projekt übersprungen
+    werden. Würden Sie das Projekt dennoch aufrufen, so wird der Build
+    abbrechen, da die Skripting Engine nicht auf dem Klassenpfad vorhanden
+    ist. Lassen Sie uns nun die <filename>pom.xml</filename>-Datei der
+    Bibliothek genauer ansehen:</para>
+
+    <example>
+      <title>Dynamisches Einfügen von Untermodulen mittels Profile
+      Aktivierung</title>
+
+      <programlisting language="xml">&lt;project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/maven-v4_0_0.xsd"&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;org.sonatype.mavenbook&lt;/groupId&gt;
+  &lt;artifactId&gt;simple&lt;/artifactId&gt;
+  &lt;packaging&gt;jar&lt;/packaging&gt;
+  &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+  &lt;name&gt;simple&lt;/name&gt;
+  &lt;url&gt;http://maven.apache.org&lt;/url&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;junit&lt;/groupId&gt;
+      &lt;artifactId&gt;junit&lt;/artifactId&gt;
+      &lt;version&gt;3.8.1&lt;/version&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;jdk16&lt;/id&gt;
+      &lt;activation&gt;<co id="coDef-profiles-active-1"
+          linkends="coRef-profiles-active-1" />
+        &lt;jdk&gt;1.6&lt;/jdk&gt;
+      &lt;/activation&gt;
+      &lt;modules&gt;<co id="coDef-profiles-active-2" lang=""
+          linkends="coRef-profiles-active-2" />
+        &lt;module&gt;simple-script&lt;/module&gt;
+      &lt;/modules&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/project&gt;
+</programlisting>
+    </example>
+
+    <para>Beim Aufruf von <command>mvn install</command> unter
+    <productname>Java 1.6</productname> werden Sie sehen, wie Maven in das
+    Unterverzeichnis <varname>simple-script</varname> wechselt und das Projekt
+    <varname>simple-script</varname> erstellt. Sollten Sie <command>mvn
+    install</command> unter <productname>Java 1.5</productname> aufrufen, so
+    wird der Build das Untermodul <varname>simple-script</varname> gar nicht
+    erst aufsuchen. Eine tiefere Betrachtung dieser
+    Aktivierungs-Konfiguration</para>
+
+    <calloutlist>
+      <callout arearefs="coDef-profiles-active-1" id="coRef-profiles-active-1">
+        <para>Das Element <varname>activation</varname> benennt die
+        Bedingungen der Profilaktivierung. In diesem Beispiel haben wir
+        angegeben, dass das Profil sich bei einer Java Version welche mit
+        "1.6" beginnt, aktiviert. Dies schliesst "1.6.0_03", 1.6.0_12", oder
+        jede andere Version, welche mit "1.6" anfängt ein.
+        Aktivierungsparameter beschränken sich keinesfalls auf die Version von
+        Java, eine Liste aller Aktivierungsparamenter finden Sie unter <xref
+        linkend="profiles-sect-activation-config"
+        xrefstyle="select:title" />.</para>
+      </callout>
+
+      <callout arch="" arearefs="coDef-profiles-active-2"
+               id="coRef-profiles-active-2">
+        <para>In diesem Profil fügen wir das Untermodul
+        <varname>simple-script</varname> zu. Diese Anweisung wird Maven dazu
+        veranlassen in das Verzeichnis <varname>simple-script</varname> zu
+        wechseln und dort nach einer Datei <filename>pom.xml</filename> zu
+        suchen.</para>
+      </callout>
+    </calloutlist>
+
+    <section id="profiles-sect-activation-config">
+      <title>Konfiguration der Aktivierung</title>
+
+      <para>Aktivierungen können einen oder mehrere der Auswahlparameter JDK
+      Version, Betriebssystem Parameter, Dateien oder Properties beinhalten.
+      Ein Profil wird aktiviert, sobald alle Kriterien erfüllt sind. Ein
+      Beispiel: ein Profil könnte die Aktivierungsparamenter: Betriebssystem
+      der Windows Familie und <acronym>JDK</acronym> von Version 1.4 benenen.
+      Ein derartiges Profil würde nur aktiviert, wenn der Aufruf auf einer
+      <productname>Windows</productname> Plattform unter Java 1.4 ausgeführt
+      wird. Sobald das Profil aktiviert ist, übersteuern alle enthaltenen
+      Elemente deren entsprechenden Elemente auf Projektebene, als wäre das
+      Profil mittles dem Argument <command>-p</command> auf Befehlszeilenebene
+      übergeben worden. Das nachfolgende Beispiel gibt ein Profil wieder,
+      welches nur unter einer ganz bestimmten Kombination von Betriebssystem
+      Parametern, Properties und einer <acronym>JDK</acronym> Version
+      aktiviert wird.</para>
+
+      <para><example>
+          <title>Aktivierung eines Profiles mittels Parameter: JDK Version, OS
+          Parameters, und Properties</title>
+
+          <programlisting language="xml">&lt;project&gt;
+  ...
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;dev&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;activeByDefault&gt;false&lt;/activeByDefault&gt;<co
+              id="coDef-profiles-active2-1"
+              linkends="coRef-profiles-active2-1" />
+        &lt;jdk&gt;1.5&lt;/jdk&gt;<co id="coDef-profiles-active2-2"
+              linkends="coRef-profiles-active2-2" />
+        &lt;os&gt;
+          &lt;name&gt;Windows XP&lt;/name&gt;<co id="coDef-profiles-active2-3"
+              linkends="coRef-profiles-active2-3" />
+          &lt;family&gt;Windows&lt;/family&gt;
+          &lt;arch&gt;x86&lt;/arch&gt;
+          &lt;version&gt;5.1.2600&lt;/version&gt;
+        &lt;/os&gt;
+        &lt;property&gt;
+          &lt;name&gt;mavenVersion&lt;/name&gt;<co
+              id="coDef-profiles-active2-4"
+              linkends="coRef-profiles-active2-4" />
+          &lt;value&gt;2.0.5&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;file&gt;
+          &lt;exists&gt;file2.properties&lt;/exists&gt;<co
+              id="coDef-profiles-active2-5"
+              linkends="coRef-profiles-active2-5" />
+          &lt;missing&gt;file1.properties&lt;/missing&gt;
+        &lt;/file&gt;
+      &lt;/activation&gt;
+      ...
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/project&gt;
+</programlisting>
+        </example>Das vorangehende Beispiel definiert eine sehr eng definierte
+      Menge von Aktivierungsparametern. Wir werden nun jede Bedingung im
+      Detail beleuchten:</para>
+
+      <calloutlist>
+        <callout arearefs="coDef-profiles-active2-1"
+                 id="coRef-profiles-active2-1">
+          <para>Das Element <varname>activeByDefault</varname> definiert, ob
+          das Profil standardmässig aktiviert ist.</para>
+        </callout>
+
+        <callout arearefs="coDef-profiles-active2-2"
+                 id="coRef-profiles-active2-2">
+          <para>Dieses Profil wird nur aktiviert, sollte eine
+          <acronym>JDK</acronym> Version welche mit "1.5" anfängt, vorliegen.
+          Dies schliesst "1.5.0_01" oder "1.5.1" ein.</para>
+        </callout>
+
+        <callout arearefs="coDef-profiles-active2-3"
+                 id="coRef-profiles-active2-3">
+          <para>Das Profil zielt auf eine ganz bestimmte Version von
+          <productname>WindowsXP</productname> ab, Version 5.1.2600 der 32-Bit
+          Plattform. Sollte Ihr Projekt das native-Plugin zur Erstellung eines
+          C-Programms einsetzen, so werden Sie sich ofter in der Situation
+          wiederfinden gegen eine spezifische Plattform zu builden.</para>
+        </callout>
+
+        <callout arearefs="coDef-profiles-active2-4"
+                 id="coRef-profiles-active2-4">
+          <para>Das Element <varname>property</varname>, welches Maven anweist
+          dieses Profil zu aktivieren, sollte das Property
+          <varname>mavenVersion</varname> auf <literal>2.0.5</literal> gesetzt
+          sein. <varname>mavenVersion</varname> ist ein implizites Property,
+          welches allen Maven Builds zur Verfügung steht.</para>
+        </callout>
+
+        <callout arearefs="coDef-profiles-active2-5"
+                 id="coRef-profiles-active2-5">
+          <para>Das Element <varname>file</varname> erlaubt es, ein Profil zu
+          aktivieren, abhängig von der Existenz (oder Abwesendheit) einer
+          Datei. Das Profil <varname>dev</varname> wird aktiviert, sollte eine
+          Datei mit dem Namen <filename>file2.properties</filename> im
+          Wurzelverzeichnis des Projektes vorhanden sein. Das Profil
+          <varname>dev</varname> wird nur aktiviert, sollte keine Datei mit
+          dem Namen <filename>file1.properties</filename> im Projekt
+          Wurzelverzeichnis vorhanden sein.</para>
+        </callout>
+      </calloutlist>
+    </section>
+
+    <section id="profiles-sect-activation-by-absence">
+      <title>Aktivierung wenn ein Property nicht vorhanden ist</title>
+
+      <para>Sie können ein Profil abhängig von einem Wert eines Property wie
+      zum Beispiel <varname>environment.type</varname> aktivieren. So können
+      Sie ein Entwicklungsprofil aktivieren, sollte das Property
+      <varname>environment.type</varname> gleich <literal>dev</literal> sein,
+      oder ein Produktionsprofil falls das Property auf
+      <literal>prod</literal> gesetzt ist. Sie können auch ein Profil auf die
+      Abwesendheit eines Property hin aktivieren. Im folgenden ein Beispiel
+      einer Konfiguration, welche ein Profil aktiviert, sollte das Property
+      <varname>environment.type</varname> während der Ausführung von Maven
+      nicht vorhanden sein:</para>
+
+      <para><example>
+          <title>Aktivierung eines Profiles wenn ein Property nicht vorhanden
+          ist</title>
+
+          <programlisting language="xml">&lt;project&gt;
+  ...
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;development&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;property&gt;
+          &lt;name&gt;!environment.type&lt;/name&gt;
+        &lt;/property&gt;
+      &lt;/activation&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/project&gt;
+</programlisting>
+        </example></para>
+
+      <para>Beachten Sie das Ausrufezeichen das dem Property-Namen vorangeht.
+      Das Ausrufezeichen wird oft auch als <emphasis>bang</emphasis>
+      bezeichnet und signalisiert eine Negation: <emphasis>nicht</emphasis>.
+      Dieses Profil wird aktiviert, sollte ein Property von
+      <varname>\${environment.type}</varname> <emphasis>nicht</emphasis>
+      bestehen.</para>
+    </section>
+  </section>
+
+  <section id="profiles-sect-listing-active-profiles">
+    <title>Auflisten der aktuell aktiven Profile</title>
+
+    <para>Maven Profile können innerhalb von <filename>pom.xml</filename>,
+    <filename>profiles.xml</filename>, <filename>~/.m2/settings.xml</filename>
+    oder <filename>\${M2_HOME}/conf/setings.xml</filename> gesetzt werden.
+    Über diese vier Ebenen hinweg gibt es wohl keinen vernünftigen Weg
+    zusammenzuhalten, welche Profile zu einer gegebenen Zeit zur Verfügung
+    stehen, ohne sich genau zu merken welche Profile innerhalb dieser vier
+    Lokationen definiert wurden. Um es einfacher zu gestalten herauszufinden
+    welche Profile zur Verfügung stehen und wo diese definiert wurden,
+    definiert das Maven Help Plugin ein separates Goal
+    <varname>active-profiles</varname>, welches alle gerade aktiven Profile
+    ausgibt und angibt, wo diese definiert wurden. Sie können das Goal
+    <varname>active-profiles</varname> im Wurzelverzeichnis eines Projektes
+    wie folgt aufrufen:</para>
+
+    <screen>$ <command>mvn help:active-profiles</command>
+Active Profiles for Project 'My Project':
+
+The following profiles are active:
+
+ - my-settings-profile (source: settings.xml)
+ - my-external-profile (source: profiles.xml)
+ - my-internal-profile (source: pom.xml)</screen>
+  </section>
+
+  <section id="profiles-sect-tips-tricks">
+    <title>Tips und Tricks</title>
+
+    <para>Profile können zur Build-Portabilität beitragen. Sollten Sie geringe
+    Anpassungen des Builds bezüglich unterschiedlicher Betriebssystem-
+    Plattformen vornehmen wollen, oder unterschiedliche Resultate abhängig von
+    der Zielplattform benötigen, so werden Build Profile die Portabilität
+    Ihres Builds erhöhen. Profile, definiert durch Einstellungen, verringern
+    im allgemeinen die Portabilität, da diese zusätzliche Projektinformationen
+    darstellen, welche ebenfalls an den Entwickler weitergegeben werden
+    müssen. Die Nachfolgenden Abschnitte geben Hinweise und Anleitung wie Sie
+    Maven Profile in Ihren Projekten sinnvoll einsetzen können.</para>
+
+    <section id="profiles-sect-common-envs">
+      <title>Gemeinsame Umgebungen</title>
+
+      <para>Eines der grundsätzlichen Motive für Maven Projekt Profile zu
+      ermöglichen, kam aus der Notwendigkeit heraus, umgebungsspezifische
+      Konfigurationen zu ermöglichen. In einer Entwicklungsumgebung werden Sie
+      Bytecode mit eingeschlossenen Debug-Informationen wünschen, und Sie
+      werden gegen eine Entwicklungsdatenbank konfiguriereren. In einer
+      produktiven Umgebung hingegen werden Sie eventuell auf ein signiertes
+      Jar sowie dem Zugriff auf eine produktive Datenbank bestehen. In diesem
+      Kapitel haben wir bislang eine Anzahl Profile mit Bezeichnern wie
+      "<literal>dev</literal>" oder "<literal>prod</literal>" erstellt.
+      Einfacher ist es sicherlich, derartige Profile von Umgebungsvariablen
+      abhängig zu machen und diese gemeinsamen Umgebungsvariablen über alle
+      Projekte hinweg anzuwenden.</para>
+
+      <para>Ein Beispiel: sollten alle Projekte ein Profil
+      <varname>development</varname> besitzen, welches mittels einem Property
+      <varname>environment.type</varname> mit dem Wert
+      "<literal>dev</literal>" aktiviert wird, und sollten alle diese Projetke
+      ein Profil <varname>production</varname> besitzen, welches mittels einem
+      Property <varname>environment.type</varname> des Wertes
+      "<literal>prod</literal>" aktiviert wird, so können Sie ein
+      Standardprofil in Ihrer <filename>settings.xml</filename>-Datei
+      definieren, das das Property <varname>environment.type</varname> auf
+      Entwicklungsmaschinen immer auf '<literal>dev</literal>' setzt. Auf
+      diese Weise definiert jedes Projekt ein Entwicklungsprofil, welches
+      immer mit dem gleichen Property aktiviert wird. Lassen Sie uns kurz
+      ausführen wie dies aussieht, im Folgenden die Datei
+      <filename>settings.xml</filename>gewöhnlich zu finden unter
+      <filename>~/.m2/settings.xml</filename>, welche das Property
+      environment.type auf 'dev' setzt.</para>
+
+      <para><example>
+          <title>~/.m2/settings.xml setzt eine Standardprofileinstellung von
+          environment.type</title>
+
+          <programlisting language="xml">&lt;settings&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;activation&gt;
+        &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
+      &lt;/activation&gt;
+      &lt;properties&gt;
+        &lt;environment.type&gt;dev&lt;/environment.type&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/settings&gt;
+</programlisting>
+        </example></para>
+
+      <para>Das bedeutet, dass jedes Mal wenn Sie Maven auf Ihrer Maschine
+      ausführen, dieses Profil aktiviert wird und somit das Property
+      <varname>environment.type</varname> auf den Wert <literal>dev</literal>
+      gesetzt ist. Sie können nachfolgend dieses Property benutzen, um
+      Profile, welche in einer Datei <filename>pom.xml</filename> definiert
+      sind, zu aktivieren. Schauen wir uns doch einmal an, wie ein in der
+      <filename>pom.xml-</filename>Datei definiertes Profil mittels dem
+      Property <varname>environment.type</varname> vom Wert
+      <literal>dev</literal> aktiviert wird:</para>
+
+      <para><example id="ex-profile-envtype-pom">
+          <title>Projekt Profil aktiviert mittels environment.type
+          'dev'</title>
+
+          <programlisting language="xml">&lt;project&gt;
+  ...
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;development&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;property&gt;
+          &lt;name&gt;environment.type&lt;/name&gt;
+          &lt;value&gt;dev&lt;/value&gt;
+        &lt;/property&gt;
+      &lt;/activation&gt;
+      &lt;properties&gt;
+        &lt;database.driverClassName&gt;com.mysql.jdbc.Driver&lt;/database.driverClassName&gt;
+        &lt;database.url&gt;
+          jdbc:mysql://localhost:3306/app_dev
+        &lt;/database.url&gt;
+        &lt;database.user&gt;development_user&lt;/database.user&gt;
+        &lt;database.password&gt;development_password&lt;/database.password&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+    &lt;profile&gt;
+      &lt;id&gt;production&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;property&gt;
+          &lt;name&gt;environment.type&lt;/name&gt;
+          &lt;value&gt;prod&lt;/value&gt;
+        &lt;/property&gt;
+      &lt;/activation&gt;
+      &lt;properties&gt;
+        &lt;database.driverClassName&gt;com.mysql.jdbc.Driver&lt;/database.driverClassName&gt;
+        &lt;database.url&gt;jdbc:mysql://master01:3306,slave01:3306/app_prod&lt;/database.url&gt;
+        &lt;database.user&gt;prod_user&lt;/database.user&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/project&gt;
+</programlisting>
+        </example></para>
+
+      <para>Dieses Projekt definert einige Properties wie
+      <varname>database.url</varname> und <varname>database.user</varname>
+      welche vielleicht zum Einsatz kommen, um ein weiteres Maven Plugin das
+      in der <filename>pom.xml</filename>-Datei angegeben ist, zu
+      konfigurieren. Es gibt Plugins, welche eine Datenbank verändern,
+      <acronym>SQL</acronym> ausführen, und auch Plugins wie das
+      <productname>Hibernate3</productname> Plugin welches annotierte Modell
+      Objekte, welche in einem Persistenzframework zum Einsatz kommen,
+      generiert. Einige dieser Plugins können in der Datei
+      <filename>pom.xml</filename> mittels dieser Properties konfiguriert
+      werden. Diese Properties könnten auch zum Filtern von Ressourcen benutzt
+      werden. In diesem Beispiel, da wir ein Profil unter
+      <filename>~/.m2/settings.xml</filename> definiert haben, welches
+      <varname>environment.type</varname> auf <literal>dev</literal> setzt,
+      wird das Profil <varname>development</varname> immer aktiviert sein,
+      wenn wir Maven auf dieser Maschine unter dem eingenen Benutzer
+      ausführen. Um diese Einstellung zu übersteuern müssen wir auf der
+      Befehlszeilenebene das Property setzen. Sollten wir das Profil
+      <varname>production</varname> aktivieren wollen, so könnten wir Maven
+      mit dem fogenden Aufruf starten:</para>
+
+      <screen>~/examples/profiles $ <command>mvn install -Denvironment.type=prod</command></screen>
+
+      <para>Das Property auf der Befehlszeile zu setzen würde den Standard
+      welcher in <filename>~/.m2/settings.xml</filename> gesetzt wurde
+      übersteuern. Wir hätten genausogut ein Profil mit einem Bezeichner von
+      '<literal>dev</literal>' definieren können und dieses mittels dem
+      Argument <command>-p</command> aufrufen können, aber der Einsatz des
+      Property <varname>environment.type</varname> erlaubt uns andere
+      <filename>pom.xml</filename>-Dateien ebenfalls gegen diesen Standard zu
+      programmieren. Jedes Projekt Ihrer Codebasis könnte sich auf ein Profil
+      abstützen, welches mittels dem selben Property
+      <varname>environment.type</varname> aktiviert wird. Dieses wird in jeden
+      Benutzers <filename>settings.xml</filename>-Datei gesetzt. Auf diesem
+      Weg können Entwickler eine gemeinsame Konfiguration in der Entwicklung
+      teilen, ohne diese Konfiguration in nicht portablen
+      <filename>settings.xml</filename>-Dateien festzuschreiben.</para>
+    </section>
+
+    <section id="profiles-sect-protecting-secrets">
+      <title>Geheimnisse bewahren</title>
+
+      <para>Diese Best Practice baut auf den vorhergehenden Abschnitt auf. In
+      <xref linkend="ex-profile-envtype-pom" xrefstyle="select:title" />
+      enthält das Profil <varname>production</varname> das Property
+      <varname>database.password</varname> nicht. Wir haben das bewusst so
+      gewählt, um Ihnen zu demonstrieren wie man Geheimnisse in der
+      benutzerspezifischen Datei <filename>settings.xml</filename> ablegen
+      kann. Sollten Sie Ihre Anwendung in einer grossen sicherheitsbewussten
+      Organisation entwickeln, so ist es warscheinlich, dass die Mehrheit der
+      Entwickler das Password der produktiven Datenbank nicht kennt. In
+      Organisationen welche klar trennen zwischen Entwicklungs- und Operativen
+      Einheiten wird dies der Normalfall sein. Entwickler haben in solche
+      Organisationen Zugriff auf Entwicklungs- und Staging-Umgebungen, aber
+      nicht (und wollen oft auch nicht) auf produktive Umgebungen. Es gibt
+      viele Gründe warum dies sinnvoll ist, insbesondere sollte eine
+      Organisation mit sensitiven Daten finanzieller, persönlicher oder
+      geheimdienstlicher Natur umgehen. In solchen Szenarien ist es oftmals
+      so, dass der produktive Build nur vom Lead-Entwickler oder gar einem
+      Mitglied der operativen Gruppe erstellt werden darf. Beim Ausführen des
+      Builds unter dem <varname>environment.type</varname>
+      <literal>prod</literal> muss diese Variable wie folgt in der
+      <filename>settings.xml</filename>-Datei definiert werden:</para>
+
+      <example>
+        <title>Einfügen von "Geheimnissen" in einem benutzerspeziefischen
+        Settings Profile</title>
+
+        <programlisting language="xml">&lt;settings&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;activeByDefault&gt;true&lt;/activeByDefault&gt;
+      &lt;properties&gt;
+        &lt;environment.type&gt;prod&lt;/environment.type&gt;
+        &lt;database.password&gt;m1ss10nimp0ss1bl3&lt;/database.password&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/settings&gt;
+</programlisting>
+      </example>
+
+      <para>Dieser Benutzer hat ein Standardprofil erstellt, welches die
+      Variable <varname>environment.type</varname> auf <literal>prod</literal>
+      setzt und auch ein produktives Password definiert. Sobald das Projekt
+      ausgeführt wird, wird das Profil <varname>production</varname> mittels
+      <varname>environment.type</varname> <literal>prod</literal> aktiviert
+      und das Property <varname>database.password</varname> wird gesetzt. Auf
+      diese Art können Sie die gesamte produktionsspezifische Konfiguration in
+      eines Projekts <filename>pom.xml</filename>-Datei angeben und lediglich
+      ein einziges Geheimnis wahren, welches notwendig ist, auf die produktive
+      Datenbank zuzugreifen.</para>
+
+      <note>
+        <para>Geheimnisse treten für gewöhnlich mit der Portabilität in den
+        Konflikt, aber das macht ja auch Sinn. Sie wollen Geheimnisse ja eben
+        auch nicht öffentlich auflegen!</para>
+      </note>
+    </section>
+
+    <section id="profiles-sect-platform-classifier">
+      <title>Plattform Klassifikatoren</title>
+
+      <para>Nehmen wir einmal an, Sie haben eine Bibliothek oder ein Projekt
+      welches plattform-spezifische Anpassungen vornimmt. Auch wenn Java
+      plattformneutral ist, so gibt es doch Situationen in welchen Sie
+      gezwungen sind Code zu schreiben welcher plattformspezifischen "nativen"
+      Code aufruft. Eine weitere Möglichkeit ist die, dass Sie Code in C
+      geschrieben haben welcher mittels dem Maven Native Plugin kompiliert
+      wird und Sie möchten einen plattformabhängigen qualifizierten Artifakten
+      erstellen und ablegen. Sie könen dann den Klassifikator mit dem Maven
+      Assembly Plugin oder dem Maven Jar Plugin setzen. Die folgende
+      <filename>pom.xml</filename>-Datei erzeugt einen qualifizierten Artifakt
+      abhängig von Profilen welche durch Betriebssystemparameter aktiviert
+      werden. Bezüglich weiterer informationen zum Maven Assembly Plugin
+      verweisen wir auf das Kapitel <xref linkend="assemblies" />.</para>
+
+      <para><example>
+          <title>Bestimmen von Artifacten mittels Plattform Aktivierten
+          Projekt Profilen</title>
+
+          <programlisting language="xml">&lt;project&gt;
+  ...
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;windows&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;os&gt;
+          &lt;family&gt;windows&lt;/family&gt;
+        &lt;/os&gt;
+      &lt;/activation&gt;
+      &lt;build&gt;
+        &lt;plugins&gt;
+          &lt;plugin
+            &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+            &lt;configuration&gt;
+              &lt;classifier&gt;win&lt;/classifier&gt;
+            &lt;/configuration&gt;
+          &lt;/plugin&gt;
+        &lt;/plugins&gt;
+      &lt;/build&gt;
+    &lt;/profile&gt;
+    &lt;profile&gt;
+      &lt;id&gt;linux&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;os&gt;
+          &lt;family&gt;unix&lt;/family&gt;
+        &lt;/os&gt;
+      &lt;/activation&gt;
+      &lt;build&gt;
+        &lt;plugins&gt;
+          &lt;plugin&gt;
+            &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+            &lt;configuration&gt;
+              &lt;classifier&gt;linux&lt;/classifier&gt;
+            &lt;/configuration&gt;
+          &lt;/plugin&gt;
+        &lt;/plugins&gt;
+      &lt;/build&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/project&gt;
+</programlisting>
+        </example></para>
+
+      <para>Sollte das Betriebssystem der
+      <productname>Windows</productname>-Familie angehören, so wird diese
+      <filename>pom.xml</filename>-Datei ein <acronym>JAR</acronym> Artefakt
+      erzeugen und mit "<emphasis>-win</emphasis>" qualifizieren. sollte das
+      Betriebssystem der UNIX-Familie zugerechnet werden, so wird der Artefakt
+      mit "<emphasis>-linux</emphasis>" qualifiziert. Dieses
+      <acronym>POM</acronym> hängt zwar erfolgreich den qualifizierenden
+      Zusatz an den Artefakt an, ist aber ausladender als unbedingt notwendig,
+      insbesondere durch die redundante Konfiguration des Maven Jar Plugin in
+      beiden Profilen. Das Beispiel könnte unter zuhilfenahme diverser
+      Substitutionen in folgender Art umgeschrieben werden um die Redundanzen
+      zu minimieren:</para>
+
+      <para><example>
+          <title>Bestimmen eines Artifacts mittels Plattform aktiviertem
+          Projektprofile und Variablensubstitution</title>
+
+          <programlisting language="xml">&lt;project&gt;
+  ...
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+        &lt;configuration&gt;
+          &lt;classifier&gt;\${envClassifier}&lt;/classifier&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+  ...
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;windows&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;os&gt;
+          &lt;family&gt;windows&lt;/family&gt;
+        &lt;/os&gt;
+      &lt;/activation&gt;
+      &lt;properties&gt;
+        &lt;envClassifier&gt;win&lt;/envClassifier&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+    &lt;profile&gt;
+      &lt;id&gt;linux&lt;/id&gt;
+      &lt;activation&gt;
+        &lt;os&gt;
+          &lt;family&gt;unix&lt;/family&gt;
+        &lt;/os&gt;
+      &lt;/activation&gt;
+      &lt;properties&gt;
+        &lt;envClassifier&gt;linux&lt;/envClassifier&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+&lt;/project&gt;
+</programlisting>
+        </example></para>
+
+      <para>Diese <filename>pom.xml</filename>-Datei zwingt uns nicht ein
+      Element <varname>build</varname> zur Konfiguration des Jar Plugin
+      einzufügen. Statt dessen wird jedes Profil mittels der
+      Betriebssystem-Familie aktiviert und setzt sodann das Property
+      <varname>envClassifier</varname> auf entweder <literal>win</literal>
+      oder <literal>linux</literal>. Dieses Property
+      <varname>envclassifier</varname> wird dann in der normalen
+      <filename>pom.xml</filename> im Element <varname>build</varname>
+      referenziert, um dort den Klassifikator and das Projekt-Jar anzufügen.
+      Der <acronym>JAR</acronym> Artefakt wird den Namen
+      <filename>\${finalName}-\${envClassifier}.jar</filename> tragen und als
+      Abhängigkeit in folgender Art und Weise eingeschlossen (Beispiel:
+      linux):</para>
+
+      <para><example>
+          <title>Abhängigkeit zu einem qualifizierten Artifact</title>
+
+          <programlisting language="xml">&lt;dependency&gt;
+      &lt;groupId&gt;com.mycompany&lt;/groupId&gt;
+      &lt;artifactId&gt;my-project&lt;/artifactId&gt;
+      &lt;version&gt;1.0&lt;/version&gt;
+      &lt;classifier&gt;linux&lt;/classifier&gt;
+    &lt;/dependency&gt;
+</programlisting>
+        </example></para>
+    </section>
+  </section>
+
+  <section id="profiles-sect-summary">
+    <title>Zusammenfassung</title>
+
+    <para>Bei sinnvollem Umgang mit Profilen können diese die spezifische
+    Konfiguration eines Builds auf verschiedenen Plattformen einfach machen.
+    Sobald Ihr Build von einer plattformabhängigen Gegebenheit abhängig ist,
+    z.B. dem Pfad zu einem Applikationsserver, so können diese Informationen
+    in einem Profil abgelegt werden, welches durch einen
+    Betriebssystemparameter aktiviert wird. Sollten Sie ein Projekt bearbeiten
+    welches bedingt, das für verschiedene Umgebungen unterschiedliche
+    Artefakte erstellt werden, so können Sie diese Anpassungen des
+    Build-Verhaltens auf verschiedene Umgebungen oder Plattformen mittels
+    profilabhängiger Plugin-Konfigurationen beeinflussen. Durch den Einsatz
+    von Profilen können Builds portabler werden. Es gibt also keinen Grund
+    Ihre Build-Logik umzuschreiben, um eine neue Umgebung zu unterstützen,
+    übersteuern Sie lediglich die Teile der Konfiguration welche Sie anpassen
+    müssen und verwenden den Rest der Konfiguration wieder.</para>
+  </section>
+</chapter>

@@ -1,0 +1,11 @@
+#parse ("/decorators/header.vm")
+    <h2>$title</h2>
+    $head
+    <img src="$base/images/logo.gif" border="0">
+    <td valign="top" class="body">
+        <div class="header">
+            <span class="pagetitle">$title</span>
+        </div>
+        $body
+    </td>
+#parse ("/decorators/footer.vm")

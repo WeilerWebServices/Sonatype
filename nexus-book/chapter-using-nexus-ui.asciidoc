@@ -1,0 +1,908 @@
+[[using]]
+== Using the User Interface
+
+[[using-sect-intro]]
+=== Introduction
+
+{pro} and {oss} provide anonymous access for users who only need to search repositories, browse repositories, and
+peruse the system feeds. This anonymous access level changes the navigation menu and some of the options available
+when you right-click on a repository. This read-only access displays the user interface shown in
+<<fig-repoman-anonymous-interface>>.
+
+[[fig-repoman-anonymous-interface]]
+.User Interface for Anonymous Users
+image::figs/web/installing-nexus-default-screen.png[scale=50]
+
+The user interface is used with a web browser and works best with modern browsers. Older versions such as
+Microsoft Internet Explorer 7 or earlier are not supported and actively blocked from using the user interface to
+avoid an unsatisfactory user experience. Internet Explorer 8 works up to {nxrm} 2.8 and is not supported for newer
+releases.
+
+The user interface is separated into a number of different
+sections. 
+
+Header::
+
+The top of the page contains the header and on the right-hand side the 'Log In' button, which is replaced with a
+drop-down to log out, as well as navigate to the users profile. The header displays the version of {nxrm} and
+potentially the availability of a newer version.
+
+Main Menu::
+
+The left-hand side of the application features the main menu, with its numerous submenus. The panel itself can be
+horizontally collapsed and expanded with the button in the top right-hand corner of the panel. Each submenu can be
+vertically collapsed and expanded with the button beside the title for each submenu. Depending on the access
+rights for the current user, different submenus and menu items are displayed.
+
+Main Panel::
+
+The main panel of the application to the right of the main menu can
+host different tabs for different selections on the submenus in the
+navigation. Each tab can be closed individually and selected as the
+active tab.
+
+
+<<fig-repository-manager-exmple-interface>> shows a typical user interface appearance with multiple tabs in the
+main panel. The activated panel 'Repositories' shows a list of repositories with the current selection
+highlighted. The panels underneath the list show details for the selected list item.
+
+[[fig-repository-manager-exmple-interface]]
+.Typical Example User Interface with Repository List and Details
+image::figs/web/repository-manager-example-interface.png[scale=50]
+
+The list header features buttons for various operations as well as an input box that allows you to filter the list
+by any terms used in any column. <<fig-repository-list-filtering>> shows an example use case where a user typed
+"snap" in the filter box and the list of repositories only shows snapshot repositories. This filtering works for
+all columns in a list and can be used in most list displays. For example you can use it to filter the users list
+to find disabled users, filter the routing list, the roles list and many more.
+
+The column headers in most lists can be clicked to invoke a sorting of
+the list by the respective column.
+
+[[fig-repository-list-filtering]]
+.Filtering the Repository List to Display Only Snapshot Repositories
+image::figs/web/repository-list-filtering.png[scale=50]
+
+TIP: A right mouse button click on list items exposes a context
+sensitive menu of operations in some lists.
+
+[[using-sect-browsing]]
+=== Browsing Repositories
+
+{inall}
+
+One of the most straightforward uses of the repository manager is to browse the structure of a repository. If you
+click on the 'Repositories' menu item in the 'Views/Repositories' menu, you should see the following display. The
+top half of <<fig-nexus-browse-repo>> shows you a list of groups and repositories along with the type of the
+repository and the repository status. To browse the components that are stored in a local repository manager,
+click on the Browse Storage tab for a repository as shown in <<fig-nexus-browse-repo>>.
+
+[[fig-nexus-browse-repo]]
+.Browsing a Repository Storage
+image::figs/web/repository-manager_browse-repositories.png[scale=50]
+When you are browsing a repository, you can right-click on any file
+and download it directly to your browser. This allows you to retrieve
+specific components manually or examine a POM file in
+the browser. In addition, components as well as directories can be
+deleted using right-click.
+
+NOTE: When browsing a remote repository you might notice that the tree doesn't contain all of the components in a
+repository. When you browse a proxy repository, the repository manager is displaying the components that have been
+cached locally from the remote repository. If you don't see an component you expected to see in the repository
+manager, it only means that it has yet to cache the component locally. If you have enabled remote repository index
+downloads, it will return search results that may include components not yet downloaded from the remote
+repository. <<fig-nexus-browse-repo>>, is just an example, and you may or may not have the example component
+available in your repository manager.
+
+A proxy repository acts as a local cache for a remote repository, in addition to downloading and caching
+components locally, the repository manager will also download an index of all the components stored in a
+particular repository. When searching or browsing for components, it is often more useful to search and browse the
+repository index. To view the repository index, click on the Browse Index tab for a particular repository to load
+the interface shown in <<fig-nexus-browse-repo-index>>.
+
+[[fig-nexus-browse-repo-index]]
+.Browsing a Repository Index
+image::figs/web/repository-manager_browse-repository-index.png[scale=50]
+
+[[using-artifact-information]]
+=== Viewing the Artifact Information
+
+{inall}
+
+Once you located an archive in the repository index or storage or via
+a search the right-hand panel will at minimum show the 'Artifact
+Information' tab as visible in
+<<fig-using-artifact-information>>. Besides showing details like the
+'Repository Path', 'Size', 'Checksums', location of the component and other
+details, you are able to download and delete the component with the
+respective buttons.
+
+[[fig-using-artifact-information]]
+.Viewing the Artifact Information
+image::figs/web/using-artifact-information.png[scale=50]
+
+[[using-component-maven-information]]
+=== Viewing the Maven Information
+
+{inall}
+
+If the component you are examining is a Maven-related component like a
+pom file or a jar, you will see the 'Maven Information' tab in the
+right-hand panels. As visible in <<fig-using-maven-information>>, the
+GAV parameters are displayed above an XML snippet identifying the
+component that you can just cut and paste into a Maven pom.xml file.
+
+[[fig-using-maven-information]]
+.Viewing the Maven Information
+image::figs/web/using-maven-information.png[scale=60]
+
+
+[[custom-metadata-plugin]]
+=== View and Editing Artifact Metadata
+
+{inrmonly}
+
+Support for custom metadata for components in Maven 2 repositories is part of {pro}. You can view, edit, and
+search for additional metadata associated to any component in your repositories.
+
+The features for custom metadata usage need to be activated by adding and enabling the 'Custom Metadata'
+capability as described in <<capabilities>>.
+
+Prior to {pro} 2.7 custom metadata support was an optional plugin that needed to be installed, following the
+instructions in <<install-additional-plugins>>.  The directory containing the plugin code is called
+nexus-custom-metadata-plugin-X.Y.Z. Install the plugin
+
+Security privileges allow you to define "read only" as well as "write"
+access for custom metadata as well as grant or disallow access.
+
+When viewing a specific component from browsing repository storage or a
+repository index or from a search, the 'Artifact Metadata' tab
+displays the interface shown in <<fig-using-viewing-metadata>>.
+
+[[fig-using-viewing-metadata]]
+.Viewing Artifact Metadata
+image::figs/web/meta_existing-meta-value.png[scale=60]
+
+Artifact metadata consists of a key, a value, and a namespace.
+Existing metadata from a component's POM is given a +urn:maven+
+namespace, and custom attributes are stored under the +urn:nexus/user+
+namespace.
+
+To add a custom attribute, click on a component, and select the 'Artifact Metadata' tab. Click 'Add...' there and
+a new row will be inserted into the list of attributes. Supply a 'Key' and 'Value' and click 'Save' to update the
+component's metadata. <<fig-using-editing-metadata>> shows the Artifact Metadata panel with two custom attributes:
+"approvedBy" and "approved".
+
+[[fig-using-editing-metadata]]
+.Editing Artifact Metadata
+image::figs/web/meta_setting-meta-value.png[scale=60]
+
+You can upload custom metadata data using an xml file. The file will be processed as component metadata if it
+meets the following criteria:
+
+* file extension is +.n3+ or +.xml+
+* the component classifier is +metadata+
+
+Here are example contents of a metadata file which adds additional
+custom metadata to a component with GAV of "test:project:1.0" and
+packaging of "jar":
+
+----
+<urn:maven/component#test:project:1.0::jar>
+    <urn:mycustomspace#repositoryId> "releases" ;
+    <urn:mycustomspace#mavenVersion> "2.2.1" ;
+    <urn:mycustomspace#releaseManager> "myusername" ;
+    <urn:mycustomspace#codeCoverage> ".99" .
+----
+
+A file with the above metadata content and a name of +metadata.n3+ can
+e.g., be attached as an additional project output component with the
+build helper maven plugin.
+
+----
+<plugin>
+  <groupId>org.codehaus.mojo</groupId>
+  <artifactId>build-helper-maven-plugin</artifactId>
+  <version>1.7</version>
+  <executions>
+    <execution>
+      <id>attach-components</id>
+      <phase>package</phase>
+      <goals>
+        <goal>attach-component</goal>
+      </goals>
+      <configuration>
+        <artifacts>
+          <artifact>
+            <file>metadata.n3</file>
+            <type>n3</type>
+            <classifier>metadata</classifier>
+          </artifact>
+        </artifacts>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+----
+
+The metadata in the file is consumed by the custom metadata plugin and becomes available in the user interface for
+inspection and search. By default this metadata available for read operations only. If the repository deployment
+policy allows redeploys, the custom metadata can be changed.
+
+
+[[archive-browser]]
+=== Using the Archive Browser
+
+{inrmonly}
+
+For binary components like jar files the repository manager displays an 'Archive Browser' panel, as visible in
+<<fig-archive-browser>> that allows you to view the contents of the archive. Clicking on invidiual files in the
+browser will download them and potentially display them in your browser. This can be useful for quickly checking
+out the contents of an archive without manually downloading and extracting it.
+
+[[fig-archive-browser]]
+.Using the Archive Browser
+image::figs/web/using-archive-browser.png[scale=60]
+
+IMPORTANT: The archive browser is a feature of {pro}.
+
+[[dependency-inspection]]
+=== Inspecting the Component Dependencies
+
+{inrmonly}
+
+{pro} provides you with the ability to browse an component's dependencies. Using the component metadata found in
+an component's POM, the repository manager will scan a repository or a repository group and attempt to resolve and
+display a component's dependencies. To view an component's dependencies, browse the repository storage or the
+repository index, select a component (or a component's POM), and then click on the 'Maven Dependency' tab.
+
+On the 'Maven Dependency' tab, you will see the following form elements:
+
+Repository:: When resolving a component's dependencies, the repository manager will query an existing repository
+or repository group. In many cases it will make sense to select the same repository group you are referencing in
+your Maven settings. If you encounter any problems during the dependency resolution, you need to make sure that
+you are referencing a repository or a group that contains these dependencies.
+
+Mode:: An component's dependencies can be listed as either a tree or a list. When dependencies are displayed in a
+tree, you can inspect direct dependencies and transitive dependencies. This can come in handy if you are assessing
+a component, based on the dependencies it is going to pull into your project's build. When you list dependencies
+as a list, the repository manager is going to perform the same process used by Maven to collapse a tree of
+dependencies into a list of dependencies using rules to merge and override dependency versions if there are any
+overlaps or conflicts.
+
+Once you have selected a repository to resolve against and a mode to display a component's dependencies, click on
+'Resolve' as shown in <<fig-using-dependencies>>. Clicking on this button will start the process of resolving
+dependencies, depending on the number of components already cached, this process can take anywhere from a few
+seconds to a minute. Once the resolution process is finished, you should see the component's dependencies, as
+shown in <<fig-using-dependencies>>.
+
+[[fig-using-dependencies]]
+.View a Component's Dependencies
+image::figs/web/using_dependencies.png[scale=60]
+
+Once you have resolved a component's dependencies, you can use the Filter text input to search for particular
+component dependencies.  If you double-click on a row in the tree or list of dependencies, you can navigate to
+other components within the user interface.
+
+[[component-info]]
+=== Viewing Component Security and License Information
+
+{inrmonly}
+
+One of the added features of {pro} is the usage of the curated and 
+up to date information from the {ds}. 
+This data contains security and license
+information about components and is accessible for a whole repository
+in the Repository Health Check feature described in <<rhc>>.  Details
+about the vulnerability and security issue ratings and others can be
+found there as well.
+
+The 'Component Info' tab displays the security and licence information
+available for a specific component. It is available in browsing or
+search results, once a you have selected a component in the search
+results list or repository tree view. An example search for Jetty, with
+the 'Component Info' tab visible, is displayed in <<fig-clm-tab-jetty>>.  It
+displays the results from the 'License Analysis' and any found 'Security
+Issues'. 
+
+The 'License Analysis' reveals a medium threat triggered by the fact
+that Non-Standard license headers were found in the source code as visible
+in the 'Observed License(s) in Source' column. The license found in the
+pom.xml file associated to the project only documented Apache-2.0 or
+EPL-1.0 as the 'Declared License(s)'.
+
+The 'Declared License' details the license information found in POM file or other meta data. The
+'Observed Licenses in Source' lists all the licenses found in
+the actual source code of the library in the form of file headers and
+license files. This data is based on source code scanning performed and provided
+by the {ds}. 
+
+[[fig-clm-tab-jetty]]
+.Component Info Displaying Security Vulnerabilities for an Old Version of Jetty 
+image::figs/web/component-info-tab-jetty.png[scale=50]
+
+The 'Security Issues' section displays two issues with 'Threat Level'
+values 5. The 'Summary' column contains a small summary description of
+the security issue. The 'Problem Code' column contains the codes,
+which link to the respective entries in the Common Vulnerabilities and
+Exposures CVE list displayed in <<fig-clm-cve-jetty>>.
+
+[[fig-clm-cve-jetty]]
+.Common Vulnerabilities and Exposures CVE Entry for a Jetty Security Issue
+image::figs/web/component-info-cve-jetty.png[scale=50]
+ 
+.Understanding the Difference, {pro} and {iq} integration
+
+
+In this section, we've talked about the various ways component data is being used, at least at an introductory
+level. However, understanding the differences between the {ds} usage in {pro} and {iq} may still be a little
+unclear. Rather you are likely asking, "What do I get with an integration of {pro} and {iq}?
+
+Policy Management::
+
+Your organization likely has a process for determining which components can be
+included in your applications. This could be as simple as limiting the age of
+the component, or more complex, like prohibiting components with a certain type
+of licenses or security issue.
+
+Whatever the case, the process is supported by rules. {iq} Policy management is a way to create those rules, and
+then track and evaluate your application. Any time a rule is broken, that's considered a policy violation.
+Violations can then warn, or even prevent a release.
+
+Here's an example of the {iq} features for Staging.
+
+[[fig-clm-staging-repository-failure]]
+.Staging Repository Activity with a {iq} Evaluation Failure and Details
+image::figs/web/clm-staging-repository-failure.png[scale=60]
+
+Component Information Panel::
+
+The Component Information Panel, or CIP, provides everything you need to know
+about a component. Looking at the image below, you'll notice two sections. On
+the left, details about the specific component are provided. On the right, the
+graph provides a wide variety of information including popularity, license, or
+security issues. You can even click on each individual version in the graph,
+which will then display on the left.
++
+[[fig-nexus-clm-nexus-show-cip]]
+.Component Information Panel Example
+image::figs/web/nexus-clm-comp-info-cip.png[scale=50]
++
+NOTE: The CIP is then expanded with the View Details button which shows exactly
+what security or license issues were encountered, as well as any policy
+violations.
+
+Audit and Quarantine::
+
+The Audit and Quarantine features use Nexus IQ policy management to protect your development environment from 
+serving risky, unwanted components. You can enable these features to identify, prevent, and release such 
+components that may compromise a proxy repository. 
+
+See our
+link:http://links.sonatype.com/products/clm/doc[{iq} documentation] to learn about releasing components from
+quarantine and other features.
+
+[[using-sect-browse-groups]]
+=== Browsing Groups
+
+{inall}
+
+The repository manager contains ordered groups of repositories that allow you to expose a series of repositories
+through a single URL. More often than not, an organization is going to point Maven at the default repository group
+'Public Repositories'. Most endusers of the repository manager are not going to know what components are being
+served from what specific repository, and they are going to want to be able to browse the public repository group.
+
+To support this use case, the repository manager allows you to browse the contents of a repository group as if it
+were a single merged repository with a tree structure.  <<fig-nexus-browse-group>>, shows the browsing storage
+interface for a repository group. There is no difference to the user experience of browsing a repository
+group vs. browsing a repository.
+
+[[fig-nexus-browse-group]]
+.Browsing a Repository Group
+image::figs/web/repository-manager_browse-group.png[scale=60]
+
+When browsing a repository group's storage, you are browsing the underlying
+storage for all of the repositories in a group. If a repository group
+contains proxy repositories, the 'Browse Storage' tab will show all of
+the components in the group that have been downloaded from the
+remote repositories. To browse and search all components available in a
+group, click on the 'Browse Index' tab to load the interface shown
+in <<fig-nexus-browse-group-index>>.
+
+[[fig-nexus-browse-group-index]]
+.Browsing a Repository Group Index
+image::figs/web/repository-manager_browse-group-index.png[scale=60]
+
+[[search-components]]
+=== Searching for Components
+
+{inall}
+
+==== Search Overview
+
+In the left-hand navigation area, there is an 'Artifact Search' text
+field next to a magnifying glass. To search for a component by groupId
+or artifactId, type in some text and click the magnifying glass.
+Typing in the search term +junit+ and clicking the
+magnifying glass should yield a search result similar to
+<<fig-search-results>>.
+
+[[fig-search-results]]
+.Results of an Artifact Search for "junit"
+image::figs/web/search-results.png[scale=50]
+
+The groupId in the 'Group' column and the artifactId in the 'Artifact'
+column identify each row in the search results table. Each row
+represents an aggregration of all components in this 'Group' and
+'Artifact' coordinate.
+
+The 'Version' column displays a link to 'Show All Versions', which
+triggers a search for the specific group and artifact.
+
+The 'Most Popular Version' column displays the version that has the most
+downloads by all users accessing the Central Repository. This data can
+help with the selection of an appropriate version to use for a
+particular component.
+
+The 'Download' column displays direct links to all the components
+available for the latest version. A typical list of
+downloadable components would include the Java archive 'jar', the Maven
+pom.xml file 'pom', a Javadoc archive 'javadoc.jar' and a Sourcecode
+archive 'sources.jar', but other download options are also added if
+more components are available. Click on the link to download an
+component.
+
+Each of the columns in the search results table can be used to sort
+the table in 'Ascending' or 'Descending' order. In addition, you can choose
+to add and remove colums with the sort and column drop-down options
+visible in <<fig-search-results-column-options>>.
+
+[[fig-search-results-column-options]]
+.Sort and Column Options in the Search Results Table
+image::figs/web/search-results-column-options.png[scale=50]
+
+The repository browser interface below the search results table will
+displays the component selected in the list in the repository structure
+with the same information panels available documented in
+<<using-sect-browsing>>. An component could be present in more than one
+repository. If this is the case, click on the value next to 'Viewing
+Repository' to switch between multiple matching repositories.
+
+WARNING: Let me guess? You installed {nxrm}, ran to the search box, typed in the name of a group or a component,
+pressed search, and saw absolutely nothing. No results. The repository manager isn't going to retrieve the remote
+repository indexes by default. You need to activate downloading of remote indexes for the three default proxy
+repositories. Without these indexes, the repository manager has nothing to search. Find instructions for
+activating index downloads in <<confignx-sect-manage-repo>>.
+
+
+==== Advanced Search
+
+Clicking on the (Show All Versions) link in the Version column visible
+in <<fig-search-results>> will initiate an 'Advanced Search' by the
+groupId and artifactId of the row and result in a view similar to
+<<fig-search-results-all-versions>>.
+
+[[fig-search-results-all-versions]]
+.Advanced Search Results for a GAV Search Activated by the Show All Versions Link
+image::figs/web/search-results-advanced-gav.png[scale=50]
+
+The header for the 'Advanced Search' contains a selector for the type of
+search and one or more text input fields to define a search and a
+button to run a new search with the specified parameters.
+
+The search results table contains one row per 'Group' (groupId),
+'Artifact' (artifactId), and 'Version'(version). 
+
+In addition, the 'Age' column displays the age of the components being
+available on the Central Repository. Since most components are
+published to the Central Repository when released, this age gives you a
+good indication of the actual time since the release of the component.
+
+The 'Popularity' column shows a relative popularity as compared to the
+other results in the search table. This can give you a good idea
+on the adoption rate of a new release. For example if a newer version has a
+high age value, but a low popularity compared to an older version, you
+might want to check the upstream project and see if there is any
+issues stopping other users from upgrading that might affect you as
+well. Another reason could be that the new version does not provide
+signifcant improvements to warrant an upgrade for most users.
+
+The 'Security Issues' column shows the number of known security issues
+for the specific component. The 'License Threat' column shows a colored
+square with blue indicating no license threat and yellow, orange and
+red indicating increased license threats. More information about both
+indicators can be seen in the 'Component Info' panel below the list of
+components for the specific component.
+
+The 'Download' column provides download links for all the available
+components.
+
+The following advanced searches are available:
+
+Keyword Search:: Identical to the 'Artifact Search' in the left-hand
+navigation, this search will look for the specified strings in the
+groupId and artifactId.
+
+Classname Search:: Rather than looking at the coordinates of an
+component in the repository, the 'Classname Search' will look at the
+contents of the components and look for Java classes with the specified
+name. For example, try a search for a classname of +Pair+ to see how
+many library authors saw a need to implement such a class, saving you
+from potentially implementing yet another version.
+
+GAV Search:: The GAV search allows a search using the Maven
+coordinates of a component. These are 'Group' (groupId), 'Artifact'
+(artifactId), 'Version' (version), 'Packaging' (packaging), and 'Classifier'
+(classifier). At a minimum you need to specify a group, component, or
+version in your search. An example search would be with a component
++guice+ and a classifier +no_aop+ or a group of
++org.glassfish.main.admingui+ and a packaging +war+. The default
+packaging is 'jar', with other values as used in the Maven packaging
+like 'ear', 'war', 'maven-plugin', 'pom', 'ejb' and many others being
+possible choices.
+
+Checksum Search:: Sometimes it is necessary to determine the version
+of a jar component in order to migrate to a qualified version. When
+attempting this and neither the filename nor the contents of the
+manfiest file in the jar contain any useful information about the
+exact version of the jar, you can use 'Checksum Search' to identify the
+component. Create a sha1 checksum, e.g., with the +sha1sum+ command
+available on Linux or +fciv+ on Windows, and use the created string in a
+checksum search. This will return one result, which will provide you
+with the GAV coordinates to replace the jar file with a dependency
+declaration.
+ 
+Metadata Search:: Search for components with specific metadata
+properties is documented in <<sect-metadata-search>>.
+
+TIP: The checksum search can be a huge timesaver when migrating a
+legacy build system, where the used libraries are checked into the
+version control system as binary components with no version information
+available.
+
+[[sect-metadata-search]]
+==== Searching Artifact Metadata
+
+{inrmonly}
+
+To search for components with specific metadata, click on the 'Advanced Search' link directly below the search
+field in the 'Artifact Search' submenu of the main menu. This opens the 'Search' panel and allows you to select
+'Metadata Search' in the search type drop-down as shown in <<fig-using-search-metadata>>.
+
+[[fig-using-search-metadata]]
+.Searching Artifact Metadata
+image::figs/web/meta_search-selection.png[scale=60]
+
+Once you select the metadata search you will see two search fields and
+an operator drop-down. The two search fields are the key and value of
+the metadata for which you are searching. The operator drop-down can be set
+to 'Equals', 'Matches', 'Key Defined', or 'Not Equal'. 'Equals' and 'Not Equals'
+compare the value for a specific key. 'Matches' allows the usage of +\*+
+to allow any characters. E.g., looking for +tr*+ would match +true+ but
+also match +tree+. The 'Key Defined' operator will ignore any value provided
+and return all components with the supplied key.
+
+.Metadata Search Results for Custom Metadata
+image::figs/web/meta_search-function.png[scale=60]
+
+Once you locate a matching component in the results list,
+click on the component and then select the Artifact Metadata to examine
+an components metadata as shown in <<fig-using-search-metadata-results>>.
+
+[[fig-using-search-metadata-results]]
+.Metadata Search Results for Custom Metadata
+image::figs/web/meta_search-result-0.png[scale=60]
+
+
+[[rhc-example-security]]
+=== Search Example: Analyzing a Security Vulnerability
+
+{inrmonly}
+
+The following example details how you can analyze security issues of a component and determine a solution with the
+help of information available in the repository manager.
+
+You noticed the component with the 'Group' org.springframework, the
+'Artifact' spring-beans and 'Version' 2.5.4. Upon further inspection
+of your software build and the components used, you can confirm that
+this component is indeed part of your shipping software. You might have
+discovered the need to investigate this initially by performing a
+repository health check as documented in the prior sections of <<rhc>>
+or an external resource such as a security mailing list.
+
+TIP: http://links.sonatype.com/products/insight/ci/home[{iq} for CI] can help you with the detection of license
+and security issues during continuous integration builds.
+http://links.sonatype.com/products/insight/ac/home[Sonatype App Health Check] allows you to analyze already
+assembled application archives.
+
+A GAV search for the component as documented in <<search-components>> allows you to inspect the 'Component Info'
+tab for the component displayed in <<fig-rhc-spring-component-info>>.
+
+[[fig-rhc-spring-component-info]]
+.GAV Search Results for +org.springframework:spring-beans+ and Component Info Tab for Version 2.5.4
+image::figs/web/rhc-spring-component-info.png[scale=45]
+
+For example, after reading the summary and inspecting the entries for the 
+security issues in the security databases linked in the 'Problem Code' column,
+you decide that these issues affect your software and a fix is
+required. In order to determine your next steps you search for all
+versions of the +spring-beans+ component. As a result you receive the
+list of all versions available partially displayed in
+<<fig-rhc-spring-list>>. The 'Security' column in the search results
+list displays the count of two security issues for the version 2.5.4
+of the library.
+
+[[fig-rhc-spring-list]]
+.Viewing Multiple Versions of org.springframework:spring-beans:x
+image::figs/web/rhc-spring-list.png[scale=45]
+
+Looking at the 'Security Issues' column in the results allows you to
+determine that with the upgrade of the library to version 2.5.6.SEC02
+the count of security issues drops to zero. The same applies to
+version 2.5.6.SEC03, which appears to be the latest version of the 2.x
+version of the component. In addition, the table shows that early
+versions of the 3.x releases were affected by security issues as well.
+
+With these results, you decide that an immediate update to version
+2.5.6.SEC03 will be required as your next step. In the longer term an
+update to a newer version of the 3.x or even 4.x releases will follow.
+
+The necessary steps to upgrade depend on your usage of the
+spring-beans library. A direct usage of the library will allow you to
+upgrade it directly. In most cases, this will require an upgrade of
+other SpringFramework libraries. If you are indirectly using
+spring-beans as a transitive dependency, you will need to figure out
+how to upgrade either the dependency causing the inclusion or override
+the version used.
+
+The detailed measures depend on the build system used, but in all cases you now have the information at your hands
+detailing why you should upgrade and what to what version to upgrade to. {iq} offers tools for these migration
+efforts as well as various ways to monitor your development for security, license, and other issues.
+
+[[rhc-example-license]]
+=== Search Example: Resolving a License Issue
+
+{inrmonly}
+
+The following example details how you can analyze a license issue of a component found in your repository health
+check and determine a solution with the help of information available in the repository manager. The same need for
+investigation might have been triggered by external means such as a need to do a legal review of all components as
+part of your release components and the requirement to manage a comprehensive bill of materials.
+
+Your repository health check detail report indicated that Hibernate 3.2.7.ga might have issues due to its 'Threat
+Level' declared as 'Non-Standard'. Looking at your software components you found that you are indeed using this
+version of Hibernate. Searching for the component in the repository manager provides you with the search results
+list and the Component Info tab for the specific version displayed in <<fig-rhc-hibernate>>.
+
+[[fig-rhc-hibernate]]
+.Viewing License Analysis Results for Hibernate
+image::figs/web/rhc-hibernate.png[scale=50]
+
+The 'Component Info' tab displays the declared license of Hibernate
+is the LGPL-3.0 license. Contrary to that, the licenses observed in the
+source code include Apache-1.1, Apache-2.0, LGPL-2.1, LGPL and
+Non-Standard. 
+
+Looking at newer versions of Hibernate you find that the observed
+license in the source code changed to 'Not-Provided'. Given this change
+you can conclude that the license headers in the individual source
+code files were removed or otherwise altered and the declared license
+was modified to LGPL-2.1.
+
+With this information in hand you determine that you will need to
+contact your lawyers to figure out if you are okay to upgrade to a
+newer version of Hibernate to remedy the uncertainty of the
+license. In addition, you will need to decide if the LGPL-2.0 is
+compatible with the distribution mechanism of your software and
+approved by your lawyers.
+
+In the above steps you learned how {pro} provides a lot of information allowing you to effectively manage your
+components during your software development life cycle with a minimum amount of effort.
+
+[[using-sect-uploading]]
+=== Uploading Components 
+
+{inall}
+
+When your build makes use of proprietary or custom dependencies that are not available from public repositories,
+you will often need to find a way to make them available to developers in a custom Maven repository. {pro} and
+{oss} ship with a preconfigured third-party repository that was designed to hold third-party dependencies that are
+used in your builds. To upload components to a repository, select a hosted repository in the 'Repositories' panel
+and then click on the 'Artifact Upload' tab. Clicking on the 'Artifact Upload' tab will display the tab shown in
+<<fig-using-component-upload>>.
+
+[[fig-using-component-upload]]
+.Component Upload Tab
+image::figs/web/using_artifact-upload.png[scale=50]
+
+To upload a component, click on 'Select Artifact(s) to Upload...', and
+select one or more components from the filesystem to upload. Once you
+have selected a component, you can modify the classifier and the
+extension before clicking on the 'Add Artifact' button. Once you have
+clicked on the 'Add Artifact' button, you can then configure the source
+of the 'Group', 'Artifact', 'Version' (GAV) parameters. 
+
+If the component you are uploading is a jar file that was created by
+Maven it will already have POM information embedded in it. If you are
+uploading a jar from a vendor you will likely need to set the group
+identifier, component identifier, and version manually. To do this,
+select 'GAV Parameters' from the 'GAV Definition' drop-down at the top of
+this form. This will expose a set of form fields
+which will let you set the 'Group', 'Artifact', 'Version', and 'Packaging' of
+the components being uploaded. Packaging can be selected from the list
+or provided by typing the value into the input box.
+
+If you would prefer to set the group, component, and version from a POM
+file associated with the uploaded component, select 'From POM' in the 'GAV
+Definition' drop-down.  This will
+expose a button labeled 'Select POM to Upload'. Once a POM file has
+been selected for upload, the name of the POM file will be displayed
+in the form field below this button.
+
+TIP: Uploading a POM file allows you to add further details like
+dependencies to the file, which improves the quality of the upload by
+enabling transitive dependency management.
+
+The 'Artifact Upload' panel supports multiple components with the same
+group, component, and version identifiers. For example, if you need to
+upload multiple components with different classifiers, you may do so by
+clicking on 'Select Artifact(s) for Upload' and 'Add Artifact' multiple
+times. A common use case for this upload is to upload the pom and jar
+file as well as the javadoc and sources jar files file for a component.
+
+[[using-sect-feeds]]
+=== Browsing System Feeds
+
+{inall}
+
+{nxrm} provides feeds that expose system events. You can browse these feeds by clicking on 'System Feeds' under the
+'Views/Repositories' menu.  Clicking on 'System Feeds' will show the panel in <<fig-repoman-system-feeds>>. You
+can use this simple interface to browse the most recent reports of component deployments, cached components,
+broken components, storage changes and other events that have occurred in the repository manager.
+
+[[fig-repoman-system-feeds]]
+.Browsing System Feeds
+image::figs/web/repository-manager_system-feed.png[scale=70]
+
+These feeds can come in handy if you are working at a large organization with multiple development teams deploying
+to the same repository manager. In such an arrangement, all developers in an organization can subscribe to the RSS
+feeds for New Deployed Artifacts as a way to ensure that everyone is aware when a new release has been pushed to a
+repository. Exposing these system events as RSS feeds also opens the door to other, more creative uses of this
+information, such as connecting the repository manager to external, automated testing systems. To access the RSS
+feeds for a specific feed, select the feed in the System Feeds view panel and then click on the Subscribe
+button. This will then load the RSS feed in your browse and you can subscribe to the feed in your favorite RSS
+
+There are a number of system feeds available in the System Feeds view,
+and each has a URL that resembles the following URL:
+
+----
+http://localhost:8081/nexus/service/local/feeds/recentlyChangedFiles
+----
+
+The URLs can be ammended with the parameters +from+ and +count+ to 
+specify the dataset viewed. E.g.  
+
+----
+http://localhost:8081/nexus/service/local/feeds/recentlyDeployedArtifacts?count=100
+----
+
+Where recentChanges would be replaced with the identifier of the feed
+you were attempting to read. Available system feeds include:
+
+- Authentication and Authorization Events
+
+- Broken components in all Nexus repositories
+
+- Broken files in all Nexus repositories
+
+- Error and Warning events
+
+- New components in all Nexus repositories
+
+- New cached components in all Nexus repositories
+
+- New cached files in all Nexus repositories
+
+- New cached release components in all Nexus repositories
+
+- New deployed components in all Nexus repositories
+
+- New deployed files in all Nexus repositories
+
+- New deployed release components in all Nexus repositories
+
+- New files in all Nexus repositories
+
+- New release components in all Nexus repositories
+
+- Recent component storage changes in all Nexus repositories
+
+- Recent file storage changes in all Nexus repositories
+
+- Recent release component storage changes in all Nexus repositories
+
+- Repository Status Changes in Nexus
+
+- System changes in Nexus
+ 
+[[support-tools]]
+=== Support Tools
+
+{inall}
+
+'Support Tools' provides a collection of useful information for monitoring and analyzing your {nxrm}
+installation. You can access the 'Support Tools' in the 'Administration' submenu of the main menu.
+
+==== System Information
+
+The 'System Information' tab displays a large number of configuration
+details related to 
+
+Nexus:: details about the versions of {nxrm} and the installed plugins, install and work directory location,
+application host and port and a number of other properties.
+
+Java Virtual Machine:: all system properties like +java.runtime.name+, +os.name+ and many more as known by the JVM
+running the repository manager.
+
+Operating System:: including environment variables
+like +JAVA_HOME+ or +PATH+ as well as details about the runtime in
+terms of processor, memory and threads, network connectors and storage
+file stores.
+
+You can copy a subsection of the text from the panel, use the
+'Download' button to get a text file or use the 'Print' button to
+produce a document.
+
+==== Support Zip
+
+The 'Support ZIP' tab allows you to create a zip archive file that
+you can submit to Sonatype support via email or a support ticket. The
+checkboxes in for 'Contents' and 'Options' allow you to control the
+content of the archive.
+
+You can include 'System Information' as available in the 'System Information' tab, a 'Thread Dump' of the JVM
+currently running the repository manager, your general 'Configuration' as well as you 'Security Configuration',
+the 'Log' and a 'Metrics' file with network and request-related information.
+
+The options allow you to limit the size of the included files as well
+as the overall file size. Pressing the 'Create' button with gather all
+files and create the archive in +sonatype-work/nexus/support+ and open
+a dialog to download the file to your workstation. 
+
+
+[[using-sect-user-profile]]
+=== Working with Your User Profile
+{inall}
+
+As a logged-in user, you can click on your user name in the top right-hand corner of the user interface to expose
+a drop-down with an option to 'Logout' as well as to access your user 'Profile'. Once you have selected to display 
+your profile, you will get access to the 'Summary' section of the 'Profile' tab as displayed in <<fig-using-profile-summary>>.
+
+[[fig-using-profile-summary]]
+.Summary Section of the Profile Tab
+image::figs/web/using-profile-summary.png[scale=50]
+
+The 'Summary' section allows you to edit your 'First Name', 'Last Name', and
+'Email' directly in the form. 
+
+==== Changing Your Password
+
+In addition to changing your name and email, the user profile allows you to change your password by clicking on
+the Change Password text. The dialog displayed in <<fig-using-profile-change-password>> will be displayed and
+allow you to supply your current password, and choose a new password. When you click on Change Password, your
+password will be changed.
+
+[[fig-using-profile-change-password]]
+.Changing Your  Password
+image::figs/web/repository-manager_change-password.png[scale=60]
+
+The password change feature only works with the built-in XML Realm security realm. If you are using a different
+security realm like LDAP or Crowd, this option will not be visible.
+
+==== Additional User Profile Tabs
+
+The Profile tab can be used by other plugins and features to
+change or access user specific data and functionality. One such use
+case is the User Token access documented in <<usertoken>>.
+
+

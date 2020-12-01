@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+	<changeSet id="create_user" author="tobrien">
+		<comment>Creating the User Table</comment>
+		<createTable tableName="users">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="first_name" type="varchar(255)" />
+			<column name="last_name" type="varchar(255)" />
+			<column name="created_at" type="datetime" />
+			<column name="updated_at" type="datetime" />
+		</createTable>
+		<rollback>
+			<dropTable tableName="users"></dropTable>
+		</rollback>
+	</changeSet>
+	<changeSet id="modify_user_add_login_password" author="tobrien">
+		<comment>Adding a login and password field to the user table</comment>
+		<addColumn tableName="users">
+			<column name="login" type="varchar(255)" />
+		</addColumn>
+		<addColumn tableName="users">
+			<column name="password" type="varbinary(32)" />
+		</addColumn>
+		<rollback>
+			<dropColumn tableName="users" columnName="login" />
+			<dropColumn tableName="password" columnName="password" />
+		</rollback>
+	</changeSet>
+	<changeSet id="create_workout" author="tobrien">
+		<comment>Creating the Workout Table</comment>
+		<createTable tableName="workouts">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="date" type="datetime" />
+			<column name="user_id" type="int(11)" />
+		</createTable>
+		<rollback>
+			<dropTable tableName="workouts"></dropTable>
+		</rollback>
+	</changeSet>
+	<changeSet id="create_location" author="tobrien">
+		<comment>Creating the Locations Table</comment>
+		<createTable tableName="locations">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)"/>
+		</createTable>
+		<rollback>
+			<dropTable tableName="locations"></dropTable>
+		</rollback>
+	</changeSet>
+	<changeSet id="add_workout_location" author="tobrien">
+		<comment>Adding a Location for a Workout</comment>
+		<addColumn tableName="workouts">
+			<column name="location_id" type="int(11)"/>
+		</addColumn>
+		<rollback>
+			<dropColumn tableName="workouts" columnName="locationId"/>
+		</rollback>
+	</changeSet>
+	<changeSet id="create_exercise_type" author="tobrien">
+		<comment>Creating a Table to Hold Exercise Type</comment>
+		<createTable tableName="exercise_types">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)"/>
+		</createTable>
+		<rollback>
+			<dropTable tableName="exercise_types"></dropTable>
+		</rollback>	
+	</changeSet>
+	<changeSet id="create_exercises" author="tobrien">
+		<comment>Creating a Table to Hold Exercises</comment>
+		<createTable tableName="exercises">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="exercise_type_id" type="int(11)"/>
+			<column name="name" type="varchar(255)"/>
+		</createTable>
+		<rollback>
+			<dropTable tableName="exercises"></dropTable>
+		</rollback>	
+	</changeSet>
+	<changeSet id="insert_exercise_types" author="tobrien">
+		<comment>Inserting initial Exercise Types</comment>
+		<loadData tableName="exercise_types" file="src/main/db/ref/exercise_types.csv">
+			<column name="id" type="NUMERIC"/>
+			<column name="name" type="STRING"/>
+		</loadData>
+	</changeSet>
+	<changeSet id="insert_sample_exercises" author="tobrien">
+		<comment>Inserting initial Exercise Types</comment>
+		<loadData tableName="exercises" file="src/main/db/ref/exercises.csv">
+			<column name="id" type="NUMERIC"/>
+			<column name="name" type="STRING"/>
+			<column name="exercise_type_id" type="NUMERIC"/>
+		</loadData>
+	</changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,50 @@
+.col-1, .col-2, .col-3, .col-4{ float:left}
+/*======= width =======*/
+.main{margin:0 auto; text-align:left; width:998px; }
+
+/*======= header =======*/
+#header {height:611px; background:url(images/top.gif) top center no-repeat #fff}
+
+/*======= index.html =======*/
+#page1 #content .col-1{ width:250px; margin-right:62px}
+#page1 #content .col-2{ width:250px; margin-right:60px}
+#page1 #content .col-3{ width:253px; margin-right:0}
+#page1 #content .bg{ background:url(images/tail.gif) repeat-y 276px top } 
+#page1 #content .bg1{ background:url(images/tail.gif) repeat-y 586px top } 
+/*======= index-1.html =======*/
+#page2 #content .col-1{ width:250px; margin-right:62px}
+#page2 #content .col-2{ width:260px; margin-right:50px}
+#page2 #content .col-3{ width:253px; margin-right:0}
+#page2 #content .bg{ background:url(images/tail.gif) repeat-y 276px top } 
+#page2 #content .bg1{ background:url(images/tail.gif) repeat-y 586px top } 
+/*======= index-2.html =======*/
+#page3 #content .col-1{ width:260px; margin-right:52px}
+#page3 #content .col-2{ width:260px; margin-right:50px}
+#page3 #content .col-3{ width:260px; margin-right:0}
+#page3 #content .bg{ background:url(images/tail.gif) repeat-y 276px top } 
+#page3 #content .bg1{ background:url(images/tail.gif) repeat-y 586px top } 
+/*======= index-3.html =======*/
+#page4 #content .col-1{ width:260px; margin-right:52px}
+#page4 #content .col-2{ width:260px; margin-right:50px}
+#page4 #content .col-3{ width:260px; margin-right:0}
+#page4 #content .bg{ background:url(images/tail.gif) repeat-y 276px top } 
+#page4 #content .bg1{ background:url(images/tail.gif) repeat-y 586px top } 
+/*======= index-4.html =======*/
+#page5 #content .col-1{ width:260px; margin-right:52px}
+#page5 #content .col-2{ width:260px; margin-right:50px}
+#page5 #content .col-3{ width:260px; margin-right:0}
+#page5 #content .bg{ background:url(images/tail.gif) repeat-y 276px top } 
+#page5 #content .bg1{ background:url(images/tail.gif) repeat-y 586px top } 
+/*======= index-5.html =======*/
+#page6 #content .col-1{ width:260px; margin-right:52px}
+#page6 #content .col-2{ width:260px; margin-right:50px}
+#page6 #content .col-3{ width:260px; margin-right:0}
+#page6 #content .bg{ background:url(images/tail.gif) repeat-y 276px top } 
+#page6 #content .bg1{ background:url(images/tail.gif) repeat-y 586px top } 
+
+/*======= footer =======*/
+#footer { height:110px; }
+#footer .col-1{ width:317px; padding-top:9px}
+#footer .col-2{ width:312px}
+#footer .col-3{ width:130px}
+#footer .col-3 img{ margin-right:8px; margin-top:32px }

@@ -1,0 +1,5 @@
+<h2>Workout Detail</h2>
+
+<ul>
+  <li>${workout.date}</li>
+</ul>

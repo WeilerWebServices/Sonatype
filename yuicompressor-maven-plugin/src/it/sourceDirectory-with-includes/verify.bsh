@@ -1,0 +1,29 @@
+import java.io.*;
+
+File file = new File( basedir, "target/classes/sourceDirectory-with-includes-all.js" );
+
+if ( !file.isFile() )
+{
+    throw new FileNotFoundException( "Could not find generated JAR: " + file );
+}
+
+BufferedReader reader = new BufferedReader( new FileReader( file ) );
+
+StringBuffer text = new StringBuffer();
+
+try
+{
+    while ( reader.ready() )
+    {
+       text.append( reader.readLine() );
+    }
+}
+finally
+{
+    reader.close();
+}
+        
+if (!text.toString().equals( "var d1;var a1;var c1;var b1;" ))
+{
+    throw new Exception( "Incorrect: " + text.toString() );
+}

@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="eclipse">
+  <title>Using m2eclipse</title>
+
+  <section id="eclipse-sect-working-maven-projects">
+    <title>Working with Maven Projects</title>
+
+    <para>The m2eclipse plugin also provides a set of features for working
+    with Maven projects once they are inside of Eclipse. There are many
+    features that ease the ability to use Maven in Eclipse so let’s dive right
+    into them. In the previous section, I materialized a Maven project and
+    selected a subproject from the Apache Camel project named camel-core.
+    We’ll use that project to demonstrate these features.</para>
+
+    <para>By right-clicking on the camel-core project, and selecting the Maven
+    menu item, you can see the available Maven features. <xref
+    linkend="fig-eclipse-available-features" /> shows a screenshot of
+    this:</para>
+
+    <figure id="fig-eclipse-available-features">
+      <title>Available Maven Features</title>
+
+      <mediaobject>
+        <imageobject role="web">
+          <imagedata contentdepth="100%"
+                     fileref="figs/web/eclipse_available-features.png"
+                     scalefit="1" width="100%" />
+        </imageobject>
+
+        <imageobject role="print">
+          <imagedata align="center"
+                     fileref="figs/web/eclipse_available-features.png"
+                     scale="50" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>Notice in <xref linkend="fig-eclipse-available-features" /> the
+    available Maven features for the camel-core project,
+    including:<itemizedlist>
+        <listitem>
+          <para>Adding dependencies and plugins</para>
+        </listitem>
+
+        <listitem>
+          <para>Updating dependencies, snapshots and source folders</para>
+        </listitem>
+
+        <listitem>
+          <para>Creating a Maven module</para>
+        </listitem>
+
+        <listitem>
+          <para>Downloading the source</para>
+        </listitem>
+
+        <listitem>
+          <para>Opening Project URLs such as the Project Web Page, Issue
+          Tracker, Source Control, and Continuous Integration tool.</para>
+        </listitem>
+
+        <listitem>
+          <para>Enabling/Disabling workspace resolution, nested Maven modules
+          and dependency management</para>
+        </listitem>
+      </itemizedlist></para>
+
+    <para>These features are also big time savers so let’s review them
+    briefly.</para>
+
+
+    <section id="eclipse-sect-downloading-source">
+      <title>Downloading Source</title>
+
+      <para>If the central Maven repository contains a source artifact for a
+      particular project, you can download the source from the repository and
+      expose it to the Eclipse environment. When you are trying to debug a
+      complex issue in Eclipse, nothing can be easier than being able to right
+      click on a third-party dependency and drill into the code in the Eclipse
+      debugger. Select this option, and m2eclipse will attempt to download the
+      source artifact from the Maven repository. If it is unable to retrieve
+      this source artifact, you should ask the maintainers of the project in
+      question to upload the appropriate Maven source bundle to the central
+      Maven repository.</para>
+    </section>
+
+    <section id="eclipse-sect-opening-project-pages">
+      <title>Opening Project Pages</title>
+
+      <para>A Maven <acronym>POM</acronym> contains some valuable
+      <acronym>URL</acronym>s which a developer may need to consult. These are
+      the project's web page, the <acronym>URL</acronym> for the source code
+      repository, a <acronym>URL</acronym> for a continuous integration system
+      like Hudson, and a <acronym>URL</acronym> for an issue tracker. If these
+      <acronym>URL</acronym>s are present in a project's
+      <acronym>POM</acronym>, m2eclipse will open these project pages in a
+      browser.</para>
+    </section>
+
+    <section id="eclipse-sect-resolving-dependencies">
+      <title>Resolving Dependencies</title>
+
+      <para>You can configure a project to resolve dependencies from a
+      workspace. This has the effect of altering the way that Maven locates
+      dependency artifacts. If a project is configured to resolve dependencies
+      from the workspace, these artifacts do not need to be present in your
+      local repository. Assume that project-a and project-b are both in the
+      same Eclipse workspace, and that project-a depends on project-b. If
+      workspace resolution is disabled, the m2eclipse Maven build for
+      <varname>project-a</varname> will only succeed if
+      <varname>project-b</varname>'s artifact is present in the local
+      repository. If workspace resolution is enabled, m2eclipse will resolve
+      the dependency via the Eclipse workspace. In other words, when workspace
+      resolution is enabled, project's don't have to be installed in the local
+      repository to relate to one another.</para>
+
+      <para>You can also disable dependency management. This has the effect of
+      telling m2eclipse to stop trying to manage your project's classpath, and
+      it will remove the Maven Dependencies classpath container from your
+      project. If you do this, you are essentially on your own when it comes
+      to managing your project's classpath.</para>
+    </section>
+  </section>
+
+  <section id="eclipse-sect-pom-form">
+    <title>Using the Form-based POM Editor</title>
+
+    <para>The latest release of the m2eclipse plugin has a form-based
+    <acronym>POM</acronym> editor which allows you to edit every part of a
+    project's <filename>pom.xml</filename> with an easy-to-use
+    <acronym>GUI</acronym> interface. To open the <acronym>POM</acronym>
+    Editor, click on a project's <filename>pom.xml</filename> file. If you've
+    customized the editors for a pom.xml file, and the POM Editor is not the
+    default editor, you may need to right-click on the file and choose "Open
+    With... / Maven POM Editor". The <acronym>POM</acronym> Editor will then
+    display the Overview tab as shown in <xref
+    linkend="fig-eclipse-pom-edit-overview" />.</para>
+
+    <note>
+      <para>The Form-based POM Editor is only available if you selected the
+      POM Editor component when you installed the m2eclipse Eclipse plugin.
+      For more information about installing the m2eclipse plugin, see <xref
+      linkend="installing-sect-install-m2eclipse" />.</para>
+    </note>
+
+    <para>One common complaint about Maven is that it forces a developer to
+    confront large and often overwhelming <acronym>XML</acronym> documents in
+    a highly complex multi-module project build. While the authors of this
+    book believe this is a small price to pay for the flexibility of a tool
+    like Maven, the graphical <acronym>POM</acronym> editor is a tool that
+    makes it possible for people to use Maven without ever having to know
+    about the <acronym>XML</acronym> structure behind a Maven
+    <acronym>POM</acronym>.</para>
+
+    <figure id="fig-eclipse-pom-edit-overview">
+      <title>Overview Tab of POM Editor for idiom-core</title>
+
+      <mediaobject>
+        <imageobject role="web">
+          <imagedata contentdepth="100%"
+                     fileref="figs/web/eclipse_pom-editor.png" scalefit="1" />
+        </imageobject>
+
+        <imageobject role="print">
+          <imagedata align="center"
+                     fileref="figs/web/eclipse_pom-editor.png" 
+                     scale="50" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>The project shown in <xref
+    linkend="fig-eclipse-pom-edit-overview" /> is a project with an
+    <varname>artifactId</varname> of of <varname>idiom-core</varname>. You'll
+    notice that most of the fields in this <varname>idiom-core</varname>
+    project are blank. There is no <varname>groupId</varname> or
+    <varname>version</varname> and there is no <acronym>SCM</acronym>
+    information supplied in the <acronym>POM</acronym> editor. This is due to
+    the fact that <varname>idiom-core</varname> inherits most of this
+    information from a parent project named <varname>idiom</varname>. If we
+    open the <filename>pom.xml</filename> for the parent project in the
+    <acronym>POM</acronym> Editor we would see the Overview tab shown in <xref
+    linkend="fig-eclipse-pom-editor-overview-parent" />.</para>
+
+    <para>That “open folder” icon on the various list entries throughout the
+    <acronym>POM</acronym> editor indicate that the corresponding entry is
+    present in the Eclipse workspace and “jar” icon indicates artifacts which
+    are referenced from the Maven repository. You can double-click on those
+    entries in order to open its POM in the POM editor. This works for
+    modules, dependencies, plugins and other elements that have corresponding
+    Maven artifacts. Underlined labels in several <acronym>POM</acronym>
+    editor sections represent hyperlinks which can be used to open the
+    <acronym>POM</acronym> editor for corresponding Maven artifact.</para>
+
+    <figure id="fig-eclipse-pom-editor-overview-parent">
+      <title>Overview Tab of POM Editor for idiom Parent Project</title>
+
+      <mediaobject>
+        <imageobject role="web">
+          <imagedata contentdepth="100%"
+                     fileref="figs/web/eclipse_pom-editor-parent.png"
+                     scalefit="1" />
+        </imageobject>
+
+        <imageobject role="print">
+          <imagedata align="center"
+                     fileref="figs/web/eclipse_pom-editor-parent.png"
+                     scale="50" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>In this parent <acronym>POM</acronym>, we see that the
+    <varname>groupId</varname> and <varname>version</varname> are defined and
+    that the parent <acronym>POM</acronym> supplies much of the information
+    which was missing in the <varname>idiom-core</varname> project. The
+    <acronym>POM</acronym> editor is going to show you the contents of the
+    <acronym>POM</acronym> that you are editing, and it will not show you any
+    of the inherited values. If you wanted to look at the
+    <varname>idiom-core</varname> project's effective <acronym>POM</acronym>
+    in the <acronym>POM</acronym> editor, you can use “Show Effective POM”
+    action from the tool-bar in the upper right-hand corner of the
+    <acronym>POM</acronym> editor, which shows a left bracket and an equals
+    sign on a page with a blue M. It will load the effective
+    <acronym>POM</acronym> for <varname>idiom-code</varname> in the
+    <acronym>POM</acronym> Editor as shown in <xref
+    linkend="fig-eclipse-pom-editor-effective" />.</para>
+
+    <figure id="fig-eclipse-pom-editor-effective">
+      <title>Effective POM for idiom-core</title>
+
+      <mediaobject>
+        <imageobject role="web">
+          <imagedata fileref="figs/web/eclipse_pom-editor-effective.png" />
+        </imageobject>
+
+        <imageobject role="print">
+          <imagedata align="center"
+                     fileref="figs/web/eclipse_pom-editor-effective.png"
+                     scale="50" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>This effective view of the <acronym>POM</acronym> merges the
+    <varname>idiom-core</varname> <acronym>POM</acronym> with the ancestor
+    <acronym>POM</acronym>s (the parent, the grandparent, etc.), similarly to
+    “mvn help:effective-pom” command and displays the <acronym>POM</acronym>
+    editor with the effective values. Because the <acronym>POM</acronym>
+    editor is display a composite view of many different merged
+    <acronym>POM</acronym>s, this effective <acronym>POM</acronym> Editor is
+    read-only, and you will not be able to update any of the fields in this
+    effective <acronym>POM</acronym> view.</para>
+
+    <para>If you were looking at the <acronym>POM</acronym> editor for the
+    idiom-core project as shown in <xref
+    linkend="fig-eclipse-pom-edit-overview" />, you can also navigate to the
+    parent <acronym>POM</acronym> using, ”Open Parent POM” action from the POM
+    editor tool-bar in the upper right-hand of the <acronym>POM</acronym>
+    editor.</para>
+
+    <para>The <acronym>POM</acronym> editor shows a number of showing various
+    information from the <acronym>POM</acronym>. The final tab exposes the
+    <filename>pom.xml</filename> as an <acronym>XML</acronym> document. There
+    is a dependencies tab shown in <xref
+    linkend="fig-eclipse-pom-editor-dependencies" /> which exposes an
+    easy-to-use interface for adding and editing dependencies to your project,
+    as well as editing the <sgmltag>dependencyManagement</sgmltag> section of
+    the <acronym>POM</acronym>. This dependency management screen is also
+    integrated with the artifact searching facilities in the m2eclipse plugin.
+    You can use actions from the editor sections, as well as Ctrl-Space typing
+    assistance for the fields in “Dependency Details” section.</para>
+
+    <para>If you need to know more about one of the artifacts, you can use
+    “Open Web Page” action from “Dependency Details” section tool-bar to check
+    the project web page.</para>
+
+    <figure id="fig-eclipse-pom-editor-dependencies">
+      <title>Dependencies Tab of the POM Editor</title>
+
+      <mediaobject>
+        <imageobject role="web">
+          <imagedata contentdepth="100%"
+                     fileref="figs/web/eclipse_pom-editor-dependencies.png"
+                     scalefit="1" />
+        </imageobject>
+
+        <imageobject role="print">
+          <imagedata align="center"
+                     fileref="figs/web/eclipse_pom-editor-dependencies.png"
+                     scale="50"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>The build tab shown in <xref
+    linkend="fig-eclipse-pom-editor-build" /> provides access to the contents
+    of the build element. From this tab you can customize source directories,
+    add extensions, change the default goal name, and add resources
+    directories.</para>
+
+    <figure id="fig-eclipse-pom-editor-build">
+      <title>Build Tab of the POM Editor</title>
+
+      <mediaobject>
+        <imageobject role="web">
+          <imagedata contentdepth="100%"
+                     fileref="figs/web/eclipse_pom-editor-build.png"
+                     scalefit="1" />
+        </imageobject>
+
+        <imageobject role="print">
+          <imagedata align="center"
+                     fileref="figs/web/eclipse_pom-editor-build.png"
+                     scale="50" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>We only showed a small subset of the <acronym>POM</acronym> editor.
+    If you are interested in seeing the rest of the tabs, please download and
+    install the m2eclipse plugin.</para>
+  </section>
+
+  <section id="eclipse-sect-summary">
+    <title>Summary</title>
+
+    <para>m2eclipse is more than just a simple plugin which adds Maven support
+    to Eclipse, it is a comprehensive integration that will make everything
+    from creating new projects to locating third-party dependencies orders of
+    magnitude easier. m2eclipse is the first step toward an
+    <acronym>IDE</acronym> that is aware of the rich semantic treasure that is
+    the central Maven repository. As more people come to use m2eclipse, more
+    projects are going to be releasing Maven Archetypes, and more projects are
+    going to see value in publishing source artifacts to the Maven repository.
+    If you've tried to use Eclipse and Maven together without a tool that can
+    comprehend the hierarchical project relationships that are central to any
+    multi-module Maven project, you will know that the ability to work with
+    nested projects is essential to smooth integration between the Eclipse
+    <acronym>IDE</acronym> and Maven.</para>
+  </section>
+</chapter>

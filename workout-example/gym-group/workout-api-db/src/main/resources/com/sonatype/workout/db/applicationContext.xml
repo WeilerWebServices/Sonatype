@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	                    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	                    http://www.springframework.org/schema/tx 
+	                    http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+  <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+    <property name="mappingResources">
+      <list>
+        <value>com/sonatype/workout/model/Exercise.hbm.xml</value>
+        <value>com/sonatype/workout/model/ExerciseType.hbm.xml</value>
+        <value>com/sonatype/workout/model/Location.hbm.xml</value>
+        <value>com/sonatype/workout/model/User.hbm.xml</value>
+        <value>com/sonatype/workout/model/Workout.hbm.xml</value>
+      </list>
+    </property>
+    <property name="hibernateProperties">
+      <value>
+        hibernate.dialect=org.hibernate.dialect.MySQLDialect
+      </value>
+    </property>
+  </bean>
+  
+  <bean id="txManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+    <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
+
+  <tx:annotation-driven transaction-manager="txManager"/>
+
+  <bean id="authService" class="com.sonatype.example.workout.api.AuthService"/>
+
+  <bean id="exerciseService" class="com.sonatype.workout.db.ExerciseServiceDBImpl">
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+
+  <bean id="userService" class="com.sonatype.workout.db.UserServiceDBImpl">
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+
+  <bean id="workoutService" class="com.sonatype.workout.db.WorkoutServiceDBImpl">
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+
+</beans>

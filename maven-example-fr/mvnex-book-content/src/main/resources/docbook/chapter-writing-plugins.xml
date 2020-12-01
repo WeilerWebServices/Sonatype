@@ -1,0 +1,1651 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="writing-plugins" lang="fr">
+  <title>Création de Plugins</title>
+
+  <section id="writing-plugins-sect-intro">
+    <title>Introduction</title>
+
+    <para>Ce chapitre aborde des fonctionnalités avancées de Maven, ce n'est pas pour autant que l'écriture d'un plugin Maven doit vous intimider.
+    Malgré la complexité de cet outil, les concepts fondamentaux sont faciles à appréhender, l'écriture de plugins reste relativement simple.
+    Après la lecture de ce chapitre, vous aurez une bonne idée de ce qu'implique la création d'un plugin Maven.</para>
+  </section>
+
+  <section id="writing-plugins-sect-programming-maven">
+    <title>Programmation Maven</title>
+
+    <para>La plus grande partie de cet ouvrage a été dédié à l'utilisation de Maven, de ce fait, 
+    vous n'avez pas vu beaucoup d'exemples de code portant sur la personnalisation de Maven.
+    En fait, vous n'en avez pas vu du tout. 
+    Maven a été pensé pour que 99% de ses utilisateurs n'aient jamais besoin d'écrire le moindre plugin pour personnaliser Maven.
+    En effet, il existe de nombre de plugins et ceux-ci peuvent être configurés pour répondre à la grande majorité des cas, 
+    vous n'aurez donc probablement pas besoin d'écrire de plugins.  
+    Cela dit, si votre projet comporte des demandes très spécifiques qui vous obligent à personnaliser le comportement de Maven, 
+    vous pouvez alors vous lancer dans la création d'un plugin.
+    Modifier le code du cœur de Maven est considéré comme hors de leur portée par la plupart des développeurs, comme
+    s'il s'agissait de modifier la pile TCP/IP d'un système d'exploitation.</para>
+
+    <para>Avant de commencer à écrire votre plugin, vous devez en apprendre un peu plus sur les entrailles de Maven : 
+    Comment gère t-il les composants logiciels ? Qu'est-ce qu'un plugin ? Comment puis-je personnaliser un cycle de vie ?
+    Cette section répond à certaines de ces questions et introduit les concepts clés du cœur de Maven.  
+    Apprendre à écrire un plugin Maven est le moyen le plus simple de personnaliser Maven.
+    Si vous vous demandiez par où démarrer pour comprendre le code de Maven, vous avez trouvé le bon point de départ.</para>
+
+    <section id="writing-plugins-ioc">
+      <title>Qu'est ce que l'inversion de contrôle ?</title>
+
+      <para>Le cœur de Maven est basé sur un  conteneur d'inversion de contrôle (<acronym>IoC</acronym>) nommé Plexus. 
+      Que fait-il ? Il s'agit d'un système de gestion des relations entre composants. 
+      Bien qu'il existe un livre dédié sur l'<acronym>IoC</acronym> écrit par Martin Fowler, 
+      le concept et le terme ont été si souvent utilisés à bon et à mauvais escient ces dernières années
+      qu'il devient difficile de trouver une bonne définition de cette notion sans que s'agisse d'une auto-référence.
+      Au lieu de recourir à une citation Wikipédia, nous allons résumer l'inversion de contrôle et l'injection de dépendances par l'intermédiaire d'une analogie.</para>
+
+      <para>Supposons que vous devez connecter une série de composants hi-fi ensemble.
+      Imaginez donc plusieurs composants stéréo branchés à une Playstation 3 et un TiVo qui doivent s'interfacer à la fois avec un boîtier Apple TV et à une télévision LCD 50 pouces.
+      Vous venez de ramener tout ce matériel d'un magasin d'électronique à la maison et vous avez acheté les câbles pour connecter tout cela.
+      Vous déballez donc l'ensemble de ces éléments, vous les installez chacun à leur place,
+      puis vous commencez à brancher les milliers de câbles coaxiaux et de prises stéréo aux milliers d'entrées numériques et analogiques.
+      Éloignez-vous de votre Home cinéma et allumez la télé, vous venez de réaliser de l'injection de dépendances, et vous étiez vous-même un conteneur d'inversion de contrôle.</para>       
+
+      <para>Quel est le rapport avec tout ça ? Transposons cette analogie en Java.
+      Votre Playstation 3 comme votre Java Bean fournissent tous les deux une interface.
+      La Playstation 3 à deux entrées : l'alimentation et la prise réseau, et une sortie vers la TV.
+      Votre Java Bean possède trois propriétés : <varname>power</varname>, <varname>network</varname> et <varname>tvOutput</varname>.
+      Quand vous ouvrez la boîte de votre Playstation 3, le manuel ne vous décrit pas en détail comment la connecter à tous les types de téléviseurs. 
+      De même, votre bean Java fournit une liste de propriétés sans pour autant vous donner une recette explicite pour créer et gérer un système complet de composants.
+      Dans un conteneur d'<acronym>IoC</acronym> tel que Plexus, il vous incombe de déclarer les relations dans un ensemble de composants qui fournit une interface d'entrée et de sortie.
+      Vous n'instanciez pas d'objets, Plexus s'en charge. Le code de votre application n'est pas responsable de la gestion des états des composants, c'est le rôle de Plexus.
+      Lorsque vous démarrez Maven, Plexus est démarré pour gérer un système d'éléments connexes, comme votre système stéréo.</para>
+
+      <para>Quels sont les avantages apportés par l'utilisation d'un conteneur <acronym>IoC</acronym> ?
+      Quel est l'avantage d'acheter des composants stéréo distincts ?
+      Si l'un des composants se casse, vous pouvez le remplacer sans avoir à dépenser les 15 000 € nécessaires pour remplacer l'ensemble de votre système.
+      Si votre téléviseur vous lâche, vous pouvez le remplacer sans que cela n'affecte le lecteur CD.
+      Et le plus important pour vous, les composants de votre chaîne hi-fi coûtent moins chers et sont plus fiables
+      car les fabricants peuvent se contenter de construire des composants en s'appuyant un ensemble d'entrées et de sorties connues.
+      Les conteneurs d'inversion de contrôle et d'injection de dépendances encouragent donc la catégorisation et l'émergence de standards.
+      L'industrie du logiciel aime s'imaginer comme source de toutes les nouvelles idées, 
+      mais l'injection de dépendances et l'inversion de contrôle ne sont réellement que de nouveaux mots pour définir des concepts bien connus : la standardisation et l'interchangabilité des apppareils.
+      Si vous voulez en savoir plus sur l'<acronym>IoC</acronym> et l'injection de dépendances, vous pouvez vous renseigner sur la Ford T, le Cotton Gin ou l'émergence d'un standard pour le chemin de fer au 19ème siècle.</para>
+    </section>
+
+    <section id="writing-plugins-intro-plexus">
+      <title>Introduction à Plexus</title>
+
+      <para>La fonctionnalité la plus importante d'un conteneur d'<acronym>IoC</acronym> Java est son mécanisme d'injection de dépendances.
+      Le principe de base d'un conteneur <acronym>IoC</acronym> est de contrôler la création et la gestion des objets. 
+      Ce ne sont plus les objets qui instancient leurs dépendances mais une tierce personne : le conteneur <acronym>IoC</acronym>.  
+      En utilisant l'injection de dépendances dans une application utilisant la programmation par interface, 
+      vous pouvez créer des composants qui n'ont aucune liaison particulière avec les différentes implémentations de vos services. 
+      Bien que votre code utilise des interfaces, 
+      vous pouvez décrire les dépendances entre les classes et les composants dans un fichier <acronym>XML</acronym> qui définit les composants,
+      les classes d'implémentation et les relations entre vos composants.
+      En d'autres termes, vous pouvez écrire des composants isolés et les lier entre eux en utilisant un fichier <acronym>XML</acronym>.
+      Dans Plexus, les différents composants d'un système sont définis par un document <acronym>XML</acronym> qui se trouve dans
+      <filename>META-INF/plexus/components.xml</filename>.</para>
+      
+      <para>Dans un conteneur Java <acronym>IoC</acronym>, il existe plusieurs moyens d'injecter des dépendances dans un objet : injection par constructeur, accesseur ou propriété.
+      Bien que Plexus soit capable d'utiliser ces trois techniques d'injection de dépendances, Maven en utilise seulement deux :
+      l'injection par propriété et par accesseur.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>Injection par constructeur</term>
+
+          <listitem>
+            <para>L'injection par constructeur permet de fournir des objets nécessaires lors de la création de l'objet.
+            Par exemple, si vous avec un objet du type <classname>Person</classname> 
+            qui possède un constructeur <methodname>Person(String name, Job job)</methodname>, 
+            vous pouvez lui passer ainsi deux valeurs, donc deux dépendances.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Injection par accesseur</term>
+
+          <listitem>
+            <para>Ce type d'injection utilise les accesseurs des propriétés des Java Beans pour remplir ses dépendances.
+            Par exemple, si vous avec un objet du type <classname>Person</classname> 
+            qui possède deux propriétés <varname>name</varname> et <varname>job</varname>,
+            un conteneur <acronym>IoC</acronym> utilisant l'injection par accesseur créera une instance de la classe <classname>Person</classname>
+            en utilisant le constructeur par défaut et appellera ensuite les méthodes 
+            <methodname>setName()</methodname> et <methodname>setJob()</methodname>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Injection par propriété</term>
+
+          <listitem>
+            <para>Les deux types d'injection précédents se basent sur l'appel de méthodes et constructeurs publics.
+            En utilisant l'injection par propriété, un conteneur <acronym>IoC</acronym> peut remplir les dépendances d'un composant
+            en utilisant directement ses propriétés.
+            Par exemple, si vous avec un objet du type <classname>Person</classname> qui contient deux propriétés <varname>name</varname> et <varname>job</varname>, 
+            votre conteneur <acronym>IoC</acronym> utilisera ces champs directement pour remplir les dépendances
+            (i.e. <code>person.name = "Thomas"; person.job = job;</code>)</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section id="writing-plugins-why-plexus">
+      <title>Pourquoi Plexus ?</title>
+
+      <para>Spring est le conteneur <acronym>IoC</acronym> le plus populaire du moment.
+      Il a de bons arguments à faire valoir : il a affecté "l'écosystème Java" en forçant les entreprises comme Sun Microsystems
+      à donner plus contrôle à la communauté open source et en permettant d'ouvrir les standards par son "bus" orienté composant sur lequel on vient se brancher.
+      Mais Spring n'est pas le seul conteneur <acronym>IoC</acronym> open source, il en existe d'autres 
+      (comme <ulink url="http://www.picocontainer.org/">PicoContainer</ulink>).</para>
+
+      <para>Il y a des années, quand Maven a été créé, Spring n'était pas si mature.
+      L'équipe initiale des développeurs Maven connaissait bien le conteneur Plexus, qu'elle avait d'ailleurs inventé, et donc c'est ce dernier qu'elle choisit.
+      S'il n'est pas aussi populaire que Spring, il en est pas pour autant moins efficace.
+      Comme Plexus a été créé par la même personne que celle qui est à l'origine de Maven, il répond parfaitement à ses besoins.
+      Après la lecture de ce chapitre, vous en saurez plus sur le fonctionnement de Plexus.
+      Si vous avez déjà utilisé un conteneur <acronym>IoC</acronym>, vous pourrez noter les similarités et les différences de ce conteneur.</para>
+
+      <note>
+        <para>Si Maven est basé sur Plexus, cela ne veut pas dire que la communauté Maven est "anti-Spring"
+        (nous avons d'ailleurs consacré un chapitre complet à Spring dans cet ouvrage).
+        La question "Pourquoi vous n'avez pas utilisé Spring ?" revient assez souvent pour que nous effectuons cet aparté.
+        Nous le savons, Spring est la star, et c'est mérité. Cependant, nous avons une tâche dans notre
+        liste qui consiste à introduire (et documenter) Plexus auprès des développeurs : dans
+        l'industrie logicielle c'est toujours bien d'avoir le choix.</para>
+      </note>
+    </section>
+
+    <section id="writing-plugins-what-is-plugin">
+      <title>Qu'est ce qu'un Plugin ?</title>
+
+      <para>Un plugin Maven est un artefact Maven qui contient un descripteur de plugin et un ou plusieurs Mojos. 
+      Un Mojo peut se comparer à un goal Maven, d'ailleurs derrière chaque goal se cache un Mojo.
+      Au goal <varname>compiler:compile</varname> correspond la classe <classname>CompilerMojo</classname> dans le plugin Maven Compiler, 
+      le goal <varname>jar:jar</varname> correspond à la classe <classname>JarMojo</classname> du plugin Maven Jar...
+      Lorsque vous écrivez votre propre plugin, vous regroupez un ensemble de Mojos (ou goals) dans un seul artefact.<footnote
+          id="foot-mojo-def">
+          <para>"mojo." The American Heritage® Dictionary of the English
+          Language, Fourth Edition. Houghton Mifflin Company, 2004.
+          Answers.com 02 Mar. 2008. <ulink
+          url="http://www.answers.com/topic/mojo-1">http://www.answers.com/topic/mojo-1</ulink></para>
+        </footnote></para>
+
+      <note>
+        <para>Mojo ? Qu'est-ce qu'un Mojo ? Le mot mojo définit dans le dictionnaire par plusieurs définitions comme un "charme magique ou un sort", 
+        une "amulette, souvent dans un petit sac de flanelle contenant un ou plusieurs objets magiques" et du "magnétisme personnel, charme".
+        Maven utilise le terme Mojo comme jeu de mots autour du terme Pojo (Plain-old Java Object), un Pojo Maven est donc appelé Mojo.</para> 
+      </note>
+
+      <para>Un Mojo est bien plus qu'un goal Maven, c'est un composant géré par Plexus qui peut inclure des références à d'autres composants Plexus.</para>
+    </section>
+  </section>
+
+  <section id="writing-plugins-sect-plugin-descriptor">
+    <title>Descripteur de Plugin</title>
+
+    <para>Un plugin Maven contient une 'carte' qui donne à Maven le chemin des différents Mojos et leur configuration.
+    Ce descripteur de plugin se trouve dans le fichier <acronym>JAR</acronym> du plugin, à l'emplacement <filename>META-INF/maven/plugin.xml</filename>.
+    Quand Maven charge un plugin, il commence par lire ce fichier <acronym>XML</acronym> puis instancie et configure les objets du plugin pour en rendre les Mojos disponibles.</para>
+
+    <para>Lorsque vous écrivez des plugins Maven, nous n'avez quasiment jamais besoin de vous soucier du descripteur.
+    Dans le <xref linkend="lifecycle" />,
+    les goals du cycle de vie rattachés au type de packaging <varname>maven-plugin</varname>
+    montrent que le goal <varname>plugin:descriptor</varname> est rattaché à la phase <varname>generate-resources</varname>. 
+    Ce goal génère un descripteur de plugin à partir de annotations présentes dans le code source du plugin.     
+    Dans la suite du chapitre, nous verrons comment les Mojos sont annotés et comment le contenu de ces annotations se retrouve dans le fichier <filename>META-INF/maven/plugin.xml</filename>.</para>    
+
+    <para>L'<xref linkend="ex-plugin-desc" /> montre le descripteur du plugin Maven Zip. 
+    Comme son nom l'indique, ce plugin permet de construire des archives Zips à partir des résultats du build.
+    Normalement, vous ne devriez jamais à avoir écrire votre propre plugin pour construire des archives avec Maven.
+    Utilisez simplement le plugin Maven Assembly, il est capable de produire des archives dans de multiples formats.
+    Regardez le descripteur de site suivant, cela vous donnera une idée de ce genre de fichier.</para>
+
+    <!--TODO: Reference Assembly Plugin Chapter-->
+
+    <example id="ex-plugin-desc">
+      <title>Plugin Descriptor</title>
+
+      <programlisting language="xml">&lt;plugin&gt;
+  &lt;description&gt;&lt;/description&gt;
+  &lt;groupId&gt;com.training.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-zip-plugin&lt;/artifactId&gt;
+  &lt;version&gt;1-SNAPSHOT&lt;/version&gt;
+  &lt;goalPrefix&gt;zip&lt;/goalPrefix&gt;
+  &lt;isolatedRealm&gt;false&lt;/isolatedRealm&gt;
+  &lt;inheritedByDefault&gt;true&lt;/inheritedByDefault&gt;
+  &lt;mojos&gt;
+    &lt;mojo&gt;
+      &lt;goal&gt;zip&lt;/goal&gt;
+      &lt;description&gt;Zips up the output directory.&lt;/description&gt;
+      &lt;requiresDirectInvocation&gt;false&lt;/requiresDirectInvocation&gt;
+      &lt;requiresProject&gt;true&lt;/requiresProject&gt;
+      &lt;requiresReports&gt;false&lt;/requiresReports&gt;
+      &lt;aggregator&gt;false&lt;/aggregator&gt;
+      &lt;requiresOnline&gt;false&lt;/requiresOnline&gt;
+      &lt;inheritedByDefault&gt;true&lt;/inheritedByDefault&gt;
+      &lt;phase&gt;package&lt;/phase&gt;
+      &lt;implementation&gt;com.training.plugins.ZipMojo&lt;/implementation&gt;
+      &lt;language&gt;java&lt;/language&gt;
+      &lt;instantiationStrategy&gt;per-lookup&lt;/instantiationStrategy&gt;
+      &lt;executionStrategy&gt;once-per-session&lt;/executionStrategy&gt;
+      &lt;parameters&gt;
+        &lt;parameter&gt;
+          &lt;name&gt;baseDirectory&lt;/name&gt;
+          &lt;type&gt;java.io.File&lt;/type&gt;
+          &lt;required&gt;false&lt;/required&gt;
+          &lt;editable&gt;true&lt;/editable&gt;
+          &lt;description&gt;Base directory of the project.&lt;/description&gt;
+        &lt;/parameter&gt;
+        &lt;parameter&gt;
+          &lt;name&gt;buildDirectory&lt;/name&gt;
+          &lt;type&gt;java.io.File&lt;/type&gt;
+          &lt;required&gt;false&lt;/required&gt;
+          &lt;editable&gt;true&lt;/editable&gt;
+          &lt;description&gt;Directory containing the build files.&lt;/description&gt;
+        &lt;/parameter&gt;
+      &lt;/parameters&gt;
+      &lt;configuration&gt;
+        &lt;buildDirectory implementation="java.io.File"&gt;
+          \${project.build.directory}&lt;/buildDirectory&gt;
+        &lt;baseDirectory implementation="java.io.File"&gt;
+          \${basedir}&lt;/baseDirectory&gt;
+      &lt;/configuration&gt;
+      &lt;requirements&gt;
+        &lt;requirement&gt;
+          &lt;role&gt;org.codehaus.plexus.archiver.Archiver&lt;/role&gt;
+          &lt;role-hint&gt;zip&lt;/role-hint&gt;
+          &lt;field-name&gt;zipArchiver&lt;/field-name&gt;
+        &lt;/requirement&gt;
+      &lt;/requirements&gt;
+    &lt;/mojo&gt;
+  &lt;/mojos&gt;
+  &lt;dependencies&gt;
+    &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
+    &lt;artifactId&gt;commons-io&lt;/artifactId&gt;
+    &lt;version&gt;1.3.2&lt;/version&gt;
+  &lt;/dependencies&gt;
+&lt;/plugin&gt;
+</programlisting>
+    </example>
+
+    <para>Un descripteur de site se compose de trois parties : la configuration haut-niveau qui contient les éléments du type
+    <sgmltag>groupId</sgmltag> et <sgmltag>artifactId</sgmltag>, la déclaration des mojos et la déclaration des dépendances.
+    Regardons chacune de ces sections dans le détail.</para>
+
+    <section id="writing-plugins-top-level-elements">
+      <title>Éléments haut-niveau du descripteur de plugin</title>
+
+      <para>Les valeurs de configuration haut-niveau du plugin sont :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>description</term>
+
+          <listitem>
+            <para>Cet élément contient une courte description du plugin. Dans le plugin Zip, cette description est laissée vide.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>groupId, artifactId, version</term>
+
+          <listitem>
+            <para>Comme tout artefact Maven, un plugin doit posséder sont triplet de coordonnées unique.
+            Le <sgmltag>groupId</sgmltag>, l'<sgmltag>artifactId</sgmltag> et la <sgmltag>version</sgmltag> sont utilisés pour identifier le plugin dans le dépôt Maven.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>goalPrefix</term>
+
+          <listitem>
+            <para>Cet élément contrôle le préfixe utilisé pour référencer les différents goals d'un plugin.
+            Si vous regardez le descripteur du plugin Compiler, vous verrez que la valeur du <varname>goalPrefix</varname> est <varname>compiler</varname>.
+            De la même manière, si vous regardez le descripteur du plugin Jar, son <varname>goalPrefix</varname> aura pour valeur <varname>jar</varname>.
+            Pour votre nouveau plugin il est important de choisir un préfixe qui n'existe pas.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>isolatedRealm (deprecated)</term>
+
+          <listitem>
+            <para>C'est une propriété legacy qui n'est plus utilisée par Maven.
+            Elle reste présente dans le système pour assurer la compatibilité avec les plugins les plus anciens.
+            Les anciennes versions du Maven utilisaient un mécanisme de chargement des dépendances des plugins dans un <classname>ClassLoader</classname> isolé.
+            Maven utilise de manière intensive le projet <ulink url="http://classworlds.codehaus.org/">ClassWorlds</ulink> provenant de la communauté <ulink url="http://www.codehaus.org">Codehaus</ulink>
+            pour créer une hiérarchie de <classname>ClassLoader</classname> qui est modélisée par un objet <classname>ClassRealm</classname>.               
+            N'hésitez pas à ignorer cette propriété et à laisser sa valeur à <varname>false</varname>.</para>              
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>inheritedByDefault</term>
+
+          <listitem>
+            <para>Si cette propriété est à <varname>true</varname>, il vous est possible de configurer vos mojos dans un projet enfant en reprenant la configuration définie dans son projet parent.
+            Si vous configurez un mojo pour être exécuté durant une phase spécifique dans un projet parent et que cette propriété est à <varname>true</varname>,
+            l'exécution de celui-ci aura lieu dans le projet fils. À l'inverse, si cette propriété est à <varname>false</varname>, l'exécution ne tiendra pas compte du projet fils.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section id="writing-plugins-sect-mojo-config">
+      <title>Configuration du Mojo</title>
+
+      <para>Vient ensuite la déclaration de chaque Mojo.
+      La balise <varname>plugin</varname> contient une balise <varname>mojos</varname> possèdant un élément par mojo présent dans le plugin.
+      Chaque balise <varname>mojo</varname> contient les éléments suivants :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>goal</term>
+
+          <listitem>
+            <para>Il s'agit du nom du goal. Si nous prenons l'exemple du goal <varname>compiler:compile</varname>,
+            <varname>compiler</varname> est le <varname>goalPrefix</varname> et
+            <varname>compile</varname> désigne le nom du goal.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>description</term>
+
+          <listitem>
+            <para>Cette balise contient la description du goal. Celle-ci est utilisée par le plugin Help pour produire la documentation du plugin.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>requiresDirectInvocation</term>
+
+          <listitem>
+            <para>Si vous affectez cette propriété à <varname>true</varname>, 
+            le goal pourra seulement s'exécuter s'il est appelé directement en la ligne de commande par un utilisateur.
+            Si quelqu'un essaye de rattacher ce goal à une phase du cycle de vie dans un <acronym>POM</acronym>, Maven affichera un message d'erreur.
+            La valeur par défaut pour cette propriété est <varname>false</varname>.</para>
+
+            <!--TODO: Might want some justification.-->
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>requiresProject</term>
+
+          <listitem>
+            <para>Spécifie si le goal peut être exécuté en dehors d'un projet.
+            Si cette propriété est affectée à <varname>true</varname> (la valeur par défaut), le goal nécessitera un <acronym>POM</acronym>.</para>   
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>requiresReports</term>
+
+          <listitem>
+            <para>Si vous créez un plugin qui nécessite la présence de rapports,
+            par exemple, si vous écrivez un plugin qui agrège les informations à partir de plusieurs rapports,
+            vous pouvez setter la propriété <varname>requiresReports</varname> à <varname>true</varname>.
+            La valeur par défaut de cette propriété est <varname>false</varname>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>aggregator</term>
+
+          <listitem>
+            <para>Un descripteur de Mojo dont la valeur de la balise <varname>aggregator</varname> est affectée à <varname>true</varname> 
+            est censé n're lancé qu'une seule fois durant une exécution Maven.
+            Ce flag a été créé pour donner la possibilité aux développeurs de plugins d'agréger la sortie d'une série de builds.
+            Par exemple, on peut utiliser celui-ci pour créer un plugin qui agrège un rapport sur tous les projets d'un build.
+            Un goal qui possède ce flag <varname>aggregator</varname> positionné à <varname>true</varname> doit être lancé uniquement à partir d'un projet haut-niveau d'un build Maven.
+            La valeur par défaut de cette propriété est <varname>false</varname>.
+            Elle est marquée comme <varname>deprecated</varname> pour les prochaines releases.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>requiresOnline</term>
+
+          <listitem>
+            <para>Spécifie si un goal donné peut s'exécuter en mode hors connexion (option <varname>-o</varname> de la ligne de commande).
+            Si un goal nécessite l'utilisation de ressources réseau et que ce flag est activé, Maven affichera une erreur si le goal est exécuté en mode hors connexion.
+            La valeur par défaut de cette propriété est <varname>false</varname>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>inheritedByDefault</term>
+
+          <listitem>
+            <para>Si cette propriété est positionnée à <varname>true</varname>,
+            un mojo configuré dans un projet parent reprendra cette configuration pour le projet enfant.
+            Si vous configurez un mojo pour s'exécuter dans une phase spécifique d'un projet parent et que ce flag est activé,
+            cette exécution sera héritée pour le projet enfant. 
+            Cette propriété est positionnée par défaut à <varname>false</varname>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>phase</term>
+
+          <listitem>
+            <para>Si vous ne rattachez pas ce goal à une phase spécifique, cet élément définit la phase par défaut du mojo.
+            Si vous ne précisez pas cet élément, Maven demandera à l'utilisateur de spécifier explicitement la phase dans le <acronym>POM</acronym>.</para> 
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>implementation</term>
+
+          <listitem>
+            <para>Il s'agit de la classe du Mojo à instancier par Maven.
+            Cette propriété est une propriété de composant Plexus (définie dans le <classname>ComponentDescriptor</classname> de Plexus).</para> 
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>language</term>
+
+          <listitem>
+            <para>Java est le langage par défaut d'un Mojo Maven.
+            Cette propriété contrôle le <classname>ComponentFactory</classname> utilisé par Plexus pour créer et instancier le Mojo. 
+            Ce chapitre se concentre sur l'écriture de plugin Java, cependant notez qu'il est possible d'utiliser d'autres langages : Groovy, Beanshell, Ruby...             
+            Dans le cas où vous utiliseriez un de ces langages alternatifs, vous auriez à configurer cet élément.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>instantiationStrategy</term>
+
+          <listitem>
+            <para>Cette propriété est une propriété de configuration de composants Plexus,
+            elle permet de contrôler la stratégie utilisée par Plexus pour gérer ses instances de composants.
+            Dans Maven, tous les mojos sont configurés avec une <varname>instantiationStrategy</varname> ayant pour valeur <varname>per-lookup</varname>.
+            Une nouvelle instance du composant (mojo) est créée à chaque fois qu'on demande à Plexus de nous le fournir.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>executionStrategy</term>
+
+          <listitem>
+            <para>Il s'agit du choix de la stratégie utilisée par Maven pour exécuter un Mojo.
+            Les différentes valeurs utilisables dans cet élément sont <varname>once-per-session</varname> et <varname>always</varname>.   
+            Note : cette propriété est dorénavant <varname>deprecated</varname> et n'est plus utilisée par Maven, elle sera supprimée dans les prochaines releases.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>parameters</term>
+
+          <listitem>
+            <para>Cette balise décrit chacun des paramètres du Mojo.
+            Quel est son nom ? Quel est son type ? Est-il obligatoire ?
+            Chaque paramètre possède les éléments suivants :</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>name</term>
+
+                <listitem>
+                  <para>Il s'agit du nom du paramètre (exemple <varname>baseDirectory</varname>)</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>type</term>
+
+                <listitem>
+                  <para>Il s'agit du type Java du paramètre (exemple <classname>java.io.File</classname>)</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>required</term>
+
+                <listitem>
+                  <para>Indique si le paramètre est obligatoire. 
+                  Affecté à <varname>true</varname>, le paramètre doit obligatoirement être passé au goal exécuté avec une valeur non nulle.</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>editable</term>
+
+                <listitem>
+                  <para>Si un paramètre n'est pas éditable (si cette propriété est positionnée à <varname>false</varname>),
+                  alors la valeur de ce paramètre ne pourra pas être modifiée dans un <acronym>POM</acronym>.
+                  Par exemple, si le descripteur de plugin définit la valeur de la propriété <varname>buildDirectory</varname> à <varname>\${basedir}</varname>,
+                  aucun <acronym>POM</acronym> ne pourra pas surcharger cette valeur.</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>description</term>
+
+                <listitem>
+                  <para>Courte description utilisée lors de la génération de la documentation du plugin (utilisée par le plugin Help)</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>configuration</term>
+
+          <listitem>
+            <para>Cet élément fournit les valeurs par défaut de tous les paramètres du Mojo utilisant la notation pour les expressions Maven.
+            Cet exemple fournit la valeur par défaut des paramètres Mojo <varname>baseDir</varname> et <varname>buildDirectory</varname>. 
+            Dans cet élément, l'implémentation spécifie le type (<classname>java.io.File</classname>), la valeur du paramètre peut contenir soit une valeur par défaut en dur soit une référence à une propriété Maven.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>requirements</term>
+
+          <listitem>
+            <para>C'est ici que le descripteur de plugin devient intéressant.
+            Un Mojo est un composant géré par Plexus. 
+            Grâce à cela, il est possible de référencer n'importe quel autre composant géré par Plexus. 
+            Cette propriété permet de définir des dépendances vers d'autres composants Plexus.</para>
+
+            <!--TODO: Insert an XREF to an example?-->
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para>Même s'il est intéressant de savoir comment lire un descripteur de plugin, vous ne devriez pratiquement jamais avoir à en écrire un.
+      Les descripteurs de plugin sont générés automatiquement à partir d'annotations présentes dans le code source du Mojo.</para>
+    </section>
+
+    <section id="writing-plugins-sect-plugin-depend">
+      <title>Dépendances d'un Plugin</title>
+
+      <para>Pour finir, le descripteur de plugin déclare une liste de dépendances comme le ferait un projet Maven.
+      Quand Maven utilise un plugin, toutes ses dépendances sont téléchargées avant d'exécuter un de ses goals.
+      Dans cet exemple, le plugin dépend de Jakarta Commons IO version 1.3.2.</para>
+    </section>
+  </section>
+
+  <section id="writing-plugins-sect-custom-plugin">
+    <title>Écrire un plugin personnalisé</title>
+
+    <para>Pour écrire un plugin, vous devez créer un ou plusieurs Mojo (goal).
+    Chaque Mojo est représenté par une classe Java qui contient des annotations pour indiquer à Maven comment générer le descripteur de plugin.
+    Avant de commencer à écrire vos classes Mojo, vous devez commencer par créer un projet Maven avec le type de packaging approprié.</para>   
+
+    <section id="writing-plugins-sect-creating-plugin-project">
+      <title>Création d'un projet Plugin</title>
+
+      <para>Pour créer un projet Plugin, vous pouvez utiliser le plugin Maven Archetype.
+      La ligne de commande suivante se chargera de générer un projet yant pour <varname>groupId</varname> <varname>org.sonatype.mavenbook.plugins</varname>,
+      et <varname>first-maven-plugin</varname> comme <varname>artifactId</varname> :</para> 
+
+      <screen>$ <command>mvn archetype:create \
+  -DgroupId=org.sonatype.mavenbook.plugins \
+  -DartifactId=first-maven-plugin \
+  -DarchetypeGroupId=org.apache.maven.archetypes \
+  -DarchetypeArtifactId=maven-archetype-mojo</command></screen>
+
+      <para>Le plugin Archetype va créer ainsi le répertoire nommé <varname>my-first-plugin</varname> qui contiendra le POM suivant.</para>
+
+      <example>
+        <title>Le POM d'un projet de plugin</title>
+
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;project&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;org.sonatype.mavenbook.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;first-maven-plugin&lt;/artifactId&gt;
+  &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+  &lt;packaging&gt;maven-plugin&lt;/packaging&gt;
+  &lt;name&gt;first-maven-plugin Maven Mojo&lt;/name&gt;
+  &lt;url&gt;http://maven.apache.org&lt;/url&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.apache.maven&lt;/groupId&gt;
+      &lt;artifactId&gt;maven-plugin-api&lt;/artifactId&gt;
+      &lt;version&gt;2.0&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;junit&lt;/groupId&gt;
+      &lt;artifactId&gt;junit&lt;/artifactId&gt;
+      &lt;version&gt;3.8.1&lt;/version&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/project&gt;</programlisting>
+      </example>
+
+      <para>L'élément le plus important d'un POM de projet de plugin est la balise <varname>packaging</varname>, celle-ci doit contenir la valeur
+      <varname>maven-plugin</varname>.
+      Ce type de packaging personnalise le cycle de vie Maven pour inclure les goals nécessaires à la création du descripteur de plugin.
+      Le cycle de vie Plugin a été présenté dans le <xref linkend="lifecycle-sect-plugin-lifecycle" />,
+      il ressemble fortement au cycle de vie Jar à ces trois exceptions près :
+      le goal <varname>plugin:descriptor</varname> est rattaché à la phase <varname>generate-resources</varname>, 
+      le goal <varname>plugin:addPluginArtifactMetadata</varname> est rattaché à la phase <varname>package</varname>,
+      et le goal <varname>plugin:updateRegistry</varname> est rattaché à la phase <varname>install</varname>.</para>
+
+      <para>L'autre partie importante d'un POM de projet de plugin est la dépendance sur Maven Plugin API.
+      Ici, le projet dépend de la version 2.0 de <varname>maven-plugin-api</varname> et ainsi que de JUnit pour les tests unitaires.</para>
+    </section>
+
+    <section id="writing-plugins-simple-java-mojo">
+      <title>Un simple Mojo Java</title>
+
+      <para>Dans ce chapitre, nous allons vous présenter comment écrire des Mojos en Java.
+      Chaque Mojo de votre projet doit implémenter l'interface <classname>org.apache.maven.plugin.Mojo</classname>,
+      l'exemple suivant présente une classe <classname>Mojo</classname> qui implémente cette interface <classname>Mojo</classname> par l'intermédiaire de la classe <classname>org.apache.maven.plugin.AbstractMojo</classname>.
+      Avant de rentrer dans le code de ce Mojo, commençons par regarder les méthodes de l'interface <classname>Mojo</classname> :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term><methodname>void setLog( org.apache.maven.monitor.logging.Log
+          log )</methodname></term>
+
+          <listitem>
+            <para>Chaque implémentation de <classname>Mojo</classname> doit fournir un moyen de communiquer son avancement.
+            L'exécution du goal a t-elle réussi ? Ou, au contraire, une erreur est-elle survenue durant l'exécution du goal ?
+            Lorsque Maven charge et exécute un Mojo, il appelle la méthode <methodname>setLog()</methodname> et passe ainsi au plugin ainsi un journal pour y écrire ses traces.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><methodname>protected Log getLog()</methodname></term>
+
+          <listitem>
+            <para>Comme nous venons de voir, Maven appelle la méthode <methodname>setLog()</methodname> avant d'exécuter votre <classname>Mojo</classname>,  
+            celui-ci peut donc récupérer le journal injecté par l'intermédiaire de la méthode <methodname>getLog()</methodname>.
+            Au lieu d'afficher l'avancement sur la sortie standard ou dans la console, il est préférable d'utiliser les méthodes de l'objet <classname>Log</classname>.</para>  
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><methodname>void execute() throws
+          org.apache.maven.plugin.MojoExecutionException</methodname></term>
+
+          <listitem>
+            <para>Cette méthode est appelée par Maven au moment de lancer l'exécution du goal.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para>L'interface <classname>Mojo</classname> est responsable de deux choses : 
+      exécuter un goal et en tracer les résultats.
+      Lorsque vous écrivez un plugin, vous pouvez faire hériter vos Mojos de la classe <classname>AbstractMojo</classname>. 
+      <classname>AbstractMojo</classname> implémente les méthodes <varname>setLog()</varname> et <varname>getLog()</varname>.
+      Il vous reste donc à implémenter la méthode <methodname>execute()</methodname> qui est déclarée comme abstraite dans cette classe mère.
+      L'<xref linkend="ex-simple-echomojo" /> présente une implémentation simple d'un <classname>Mojo</classname> qui se contente d'afficher un message dans la console.</para> 
+
+      <example id="ex-simple-echomojo">
+        <title>Un simple EchoMojo</title>
+
+        <programlisting language="java">package org.sonatype.mavenbook.plugins;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+
+/**
+ * Echos an object string to the output screen.
+ * @goal echo
+ * @requiresProject false
+ */
+public class EchoMojo extends AbstractMojo
+{
+    /**
+     * Any Object to print out.
+     * @parameter expression="\${echo.message}" default-value="Hello World..."
+     */
+    private Object message;
+
+    public void execute()
+        throws MojoExecutionException, MojoFailureException
+    {
+        getLog().info( message.toString() );
+    }
+}
+</programlisting>
+      </example>
+
+      <para>Si vous créez ce Mojo dans le répertoire <varname>\${basedir}</varname> sous <filename>src/main/java</filename> à l'emplacement
+      <filename>org/sonatype/mavenbook/mojo/EchoMojo.java</filename> dans le projet créé précédemment et que vous exécutez la commande <command>mvn install</command>,  
+      vous devriez être capable d'appeler votre directement goal à partir de la ligne de commande :</para>
+
+      <screen>$ <command>mvn org.sonatype.mavenbook.plugins:first-maven-plugin:1.0-SNAPSHOT:echo</command></screen>
+
+      <para>Cette (longue) ligne de commande est un simple appel à <command>mvn</command> suivi d'un argument : <varname>groupId:artifactId:version:goal</varname>. 
+      Lorsque vous exécutez cette ligne de commande, vous devriez voir apparaître le message "Hello Maven World..." dans votre console.
+      Pour personnaliser ce message, vous pouvez passer le paramètre suivant à cette même ligne de commande :</para>
+
+      <screen>$ <command>mvn org.sonatype.mavenbook.plugins:first-maven-plugin:1.0-SNAPSHOT:echo \
+             -Decho.message="The Eagle has Landed"</command></screen>
+
+      <para>Cette ligne de commande exécute le goal <classname>EchoMojo</classname> et affiche le message "The Eagle has Landed".</para>
+
+    </section>
+
+    <section id="writing-plugins-sect-plugin-prefix">
+      <title>Configuration d'un préfixe de Plugin</title>
+
+      <para>Spécifier à chaque fois le <varname>groupId</varname>, l'<varname>artifactId</varname>, la <varname>version</varname> et <varname>goal</varname> est un peu lourd (c'est le moindre que l'on puisse dire).
+      Pour éviter cela, vous avez la possibilité d'utiliser un préfixe de plugin. Par exemple, au lieu de taper :</para>
+
+      <screen>$ mvn org.apache.maven.plugins:maven-jar-plugin:2.3:jar</screen>
+
+      <para>Vous pouvez utiliser le préfixe <varname>jar</varname>. Ainsi, la ligne de commande devient beaucoup plus digeste : <command>mvn jar:jar</command>.
+      Comment Maven sait-il transformer <varname>jar:jar</varname> en <varname>org.apache.mven.plugins:maven-jar:2.3</varname> ?
+      Maven regarde dans un fichier du dépôt Maven pour obtenir la liste des plugins pour un <varname>groupId</varname> spécifique.
+      Par défaut, Maven est configuré pour rechercher les plugins dans deux groupes : 
+      <varname>org.apache.maven.plugins</varname> et <varname>org.codehaus.mojo</varname>.
+      Lorsque vous spécifiez un nouveau préfixe comme <command>mvn hibernate3:hbm2ddl</command>,
+      Maven scanne les métadonnées du dépôt Maven à la recherche du plugin approprié.
+      Maven commence par parcourir les groupes  <varname>org.apache.maven.plugins</varname> à la recherche du préfixe <varname>hibernate3</varname>.
+      S'il n'y trouve pas de préfixe <varname>hibernate3</varname>, il continuera en parcourant les métadonnées du groupe <varname>org.codehaus.mojo</varname>.</para>
+
+      <para>Lorsque Maven parcourt les métadonnées d'un <varname>groupId</varname>,
+      il récupére deuis le dépôt Maven le fichier <acronym>XML</acronym> qui contient les métadonnées des artefacts de ce groupe.
+      Ce fichier <acronym>XML</acronym> est spécifique à chaque dépôt.
+      Si vous n'avez pas configuré de dépôt, Maven se contentera de chercher dans les métadonnées du groupe <varname>org.apache.maven.plugins</varname>
+      dans votre dépôt Maven local (<filename>~/.m2/repository</filename>) dans le fichier
+      <filename>org/apache/maven/plugins/maven-metadata-central.xml</filename>.
+      L'<xref linkend="ex-maven-metadata" /> présente une partie du fichier <acronym>XML</acronym> <filename>maven-metadata-central.xml</filename> du groupe 
+      <varname>org.apache.maven.plugin</varname>.</para>
+
+      <example id="ex-maven-metadata">
+        <title>Métadonnées Maven du groupe Maven Plugin</title>
+
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;metadata&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;name&gt;Maven Clean Plugin&lt;/name&gt;
+      &lt;prefix&gt;clean&lt;/prefix&gt;
+      &lt;artifactId&gt;maven-clean-plugin&lt;/artifactId&gt;
+    &lt;/plugin&gt;
+    &lt;plugin&gt;
+      &lt;name&gt;Maven Compiler Plugin&lt;/name&gt;
+      &lt;prefix&gt;compiler&lt;/prefix&gt;
+      &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+    &lt;/plugin&gt;
+    &lt;plugin&gt;
+      &lt;name&gt;Maven Surefire Plugin&lt;/name&gt;
+      &lt;prefix&gt;surefire&lt;/prefix&gt;
+      &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
+    &lt;/plugin&gt;
+    ...
+  &lt;/plugins&gt;
+&lt;/metadata&gt;</programlisting>
+      </example>
+
+      <para>Comme vous pouvez le voir dans l'<xref linkend="ex-maven-metadata" />,
+      c'est ce fichier <filename>maven-metadata-central.xml</filename> qui rend possible l'exécution de la commande <command>mvn surefire:test</command>.   
+      Maven parcourt <varname>org.apache.maven.plugins</varname> et <varname>org.codehaus.mojo</varname> :
+      les plugins du groupe <varname>org.apache.maven.plugins</varname> sont considérés comme des plugins du cœur Maven,
+      alors que les plugins du groupe <varname>org.codehaus.mojo</varname> sont considérés comme des plugins moins importants.
+      Le projet Apache Maven gère le groupe <varname>org.apache.maven.plugins</varname>, et c'est une communauté open source indépendante qui a la charge du projet Codehaus Mojo.
+      Si vous désirez publier vos plugins avec votre <varname>groupId</varname>, et que Maven parcourt 
+      automatiquement le préfixe de plugin de votre nouveau <varname>groupId</varname>, vous pouvez personnaliser les groupes traités par Maven dans vos fichiers Maven de configuration personnelle.</para>
+
+      <para>Pour exécuter votre goal echo <varname>first-maven-plugin</varname> en utilisant la commande <varname>first:echo</varname>,
+      ajoutez le groupId <varname>org.sonatype.mavenbook.plugins</varname> dans votre fichier <filename>~/.m2/settings.xml</filename> comme le montre l'<xref linkend="ex-plugin-groups" />.
+      Ainsi, un nouveau groupe sera ajouté en début de liste des groupes analysés par Maven.</para>
+       
+      <example id="ex-plugin-groups">
+        <title>Personnaliser les groupes de plugins dans les Settings Maven</title>
+
+        <programlisting language="xml">&lt;settings&gt;
+  ...
+  &lt;pluginGroups&gt;
+    &lt;pluginGroup&gt;org.sonatype.mavenbook.plugins&lt;/pluginGroup&gt;
+  &lt;/pluginGroups&gt;
+&lt;/settings&gt;</programlisting>
+      </example>
+
+      <para>Ceci fait, vous pouvez maintenant exécuter votre goal par l'intermédiaire de la commande <command>mvn first:echo</command>
+      à partir de n'importe quel répertoire. Vous constaterez que Maven saura interpréter correctement votre préfixe.   
+      Cela fonctionne car le projet respecte certaines conventions de nommage.
+      Si votre projet plugin a un <varname>artifactId</varname> qui respecte le format <varname>maven-first-plugin</varname> ou
+      <varname>first-maven-plugin</varname>, Maven affectera automatiquement le préfixe <varname>first</varname> à votre plugin. 
+      En d'autres termes, lorsque le plugin Maven Plugin a généré le descripteur de votre plugin et que vous n'avez pas spéficifié de <varname>goalPrefix</varname> dans votre projet,
+      le goal <varname>plugin:descriptor</varname> récupérera le préfixe de votre plugin à partir de son <varname>artifactId</varname> lorsqu'il suit l'un des formats suivants :</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><varname>\${prefix}-maven-plugin</varname>, OU</para>
+        </listitem>
+
+        <listitem>
+          <para><varname>maven-\${prefix}-plugin</varname></para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Si vous désirez définir explicitement un préfixe de plugin, you avez besoin de configurer le plugin Maven Plugin.
+      Le plugin Maven Plugin est responsable de la construction du descripteur de plugin et doit également effectuer certaines tâches durant les phases de packaging et de chargement. 
+      Le plugin Maven Plugin est configurable comme n'importe quel autre plugin via la balise <varname>build</varname>.
+      Pour configurer le préfixe de votre plugin, ajoutez le code XML dans la balise <varname>build</varname> du projet <varname>first-maven-plugin</varname>.</para>  
+
+      <example id="ex-plugin-prefix">
+        <title>Configuration d'un préfixe de plugin</title>
+
+        <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;project&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;org.sonatype.mavenbook.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;first-maven-plugin&lt;/artifactId&gt;
+  &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+  &lt;packaging&gt;maven-plugin&lt;/packaging&gt;
+  &lt;name&gt;first-maven-plugin Maven Mojo&lt;/name&gt;
+  &lt;url&gt;http://maven.apache.org&lt;/url&gt;
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;artifactId&gt;maven-plugin-plugin&lt;/artifactId&gt;
+        &lt;version&gt;2.3&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;goalPrefix&gt;blah&lt;/goalPrefix&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.apache.maven&lt;/groupId&gt;
+      &lt;artifactId&gt;maven-plugin-api&lt;/artifactId&gt;
+      &lt;version&gt;2.0&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;junit&lt;/groupId&gt;
+      &lt;artifactId&gt;junit&lt;/artifactId&gt;
+      &lt;version&gt;3.8.1&lt;/version&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/project&gt;</programlisting>
+      </example>
+
+      <para>L'<xref linkend="ex-plugin-prefix" /> configure le préfixe du plugin pour qu'il prenne la valeur <varname>blah</varname>.
+      Si vous avez ajouté le groupe <varname>org.sonatype.mavenbook.plugins</varname> à la liste des groupes 
+      <sgmltag>pluginGroups</sgmltag> de votre fichier <filename>~/.m2/settings.xml</filename>, 
+      vous devriez pouvoir exécuter <classname>EchoMojo</classname> en lançant la commande suivante <command>mvn echo:blah</command>.</para>
+    </section>
+
+    <section id="writing-plugins-sect-logging">
+      <title>Les traces d'un plugin</title>
+
+      <para>Maven s'occupe de connecter votre mojo à un logger en appelant la méthode <methodname>setLog()</methodname> avant l'exécution de votre Mojo.
+      Il fournit une implémentation de la classe <classname>org.apache.maven.monitor.logging.Log</classname>.
+      Cette classe expose des méthodes qui vous pouvez utiliser pour afficher des informations à vos utilisateurs.
+      La classe <classname>Log</classname> fournit plusieurs niveaux de trace, elle propose donc un mécanisme similaire à l'<acronym>API</acronym> fournie par <ulink
+      url="http://logging.apache.org/">Log4J</ulink>. 
+      Ces différents niveaux sont utilisables par l'intermédiaire de plus méthodes dédiées : debug, info, error et warn.
+      Afin de sauver les arbres, nous ne listerons ici que les méthodes du niveau degug.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term><methodname>void debug( CharSequence message )</methodname></term>
+
+          <listitem>
+            <para>Affiche un message en utilisant le niveau debug.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><methodname>void debug( CharSequence message, Throwable t )</methodname></term>
+
+          <listitem>
+            <para>Affiche un message en utilisant le niveau debug et ajoute une trace de l'état de la pile à partir d'une <classname>Throwable</classname>
+            <classname>Exception</classname> ou <classname>Error</classname>)</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><methodname>void debug( Throwable t )</methodname></term>
+
+          <listitem>
+            <para>Affiche la trace de l'état de la pile de la<classname>Throwable</classname> (<classname>Exception</classname> ou <classname>Error</classname>)</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para>Chacun de ces quatre niveaux expose ces trois méthodes.
+      Ces quatre niveaux répondent à quatre buts différents.
+      Le niveau debug est dédié aux personnes qui désirent une vue très détaillée de ce qui se passe lors de l'exécution d'un Mojo.  
+      Vous ne devez donc jamais présumer que vos utilisateurs utilisent ce niveau.
+      Pour cela, il est préférable d'utiliser le niveau info qui est destiné à afficher des messages d'informations généraux lors d'une utilisation normale du mojo.
+      Par exemple, si vous construisez un plugin qui compile du code, utilisez ce niveau info pour afficher la sortie du compilateur à l'écran.</para>
+
+      <para>Le niveau de logging warn est utilisé pour afficher des événements et messages d'erreurs que votre Mojo pourrait rencontrer.
+      Par exemple, si vous essayez d'exécuter un plugin qui compile du code source Ruby mais que ce code n'est pas disponible, affichez un warning.
+      Contrairement aux erreurs (qui disposent d'un niveau dédié : error), les warnings ne sont pas destinés à afficher des erreurs bloquantes.          
+      Vous utiliseriez plutôt le niveau error lorsque votre Mojo qui doit compiler du code, ne trouve pas de compilateur.
+      Dans ce cas, vous voudrez probablement afficher un message d'erreur et lever une exception.
+      Vous pouvez considérer que vos utilisateurs verront les messages en info et tous les messages d'erreurs.</para>
+
+    </section>
+
+    <section id="writing-plugins-sect-class-annotations">
+      <title>Annotations de Mojo</title>
+
+      <para>Dans le plugin <varname>first-maven-plugin</varname>, vous n'avez pas écrit de descripteur de plugin, Maven s'est chargé d'en générer un pour vous.
+      Pour cela, Maven utilise les informations du <acronym>POM</acronym> du projet et une liste d'annotations présentes dans votre classe <classname>EchoMojo</classname>.
+      La classe <classname>EchoMojo</classname> contient une seule annotation : <classname>@goal</classname>.
+      Voici la liste complète des annotations utilisables dans un <classname>Mojo</classname>.</para>          
+
+      <para><variablelist>
+          <varlistentry>
+            <term>@goal &lt;goalName&gt;</term>
+
+            <listitem>
+              <para>C'est la seule annotation obligatoire, elle donne un nom unique au goal que vous êtes en train d'écrire.</para>
+
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>@requiresDependencyResolution &lt;requireScope&gt;</term>
+
+            <listitem>
+              <para>Marque le mojo comme un mojo qui nécessite la résolution des dépendances d'un certain scope (explicite ou implicite).
+              Les valeurs autorisées sont : compile, runtime ou test.
+              Par exemple, si la valeur de cette annotation est passée à <varname>test</varname>,                
+               Maven ne peut exécuter ce Mojo qu'une fois que les dépendances du scope test sont résolues.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>@requiresProject (true|false)</term>
+
+            <listitem>
+              <para>Marque ce goal comme goal devant être exécuté à l'intérieur d'un projet.
+              La valeur par défaut est <literal>true</literal>.
+              À l'opposé, certains plugins comme le plugin Archetype ne le sont pas : ils n'ont pas besoin d'un <acronym>POM</acronym> pour s'exécuter.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>@requiresReports (true|false)</term>
+
+            <listitem>
+              <para>Si vous voulez créer un plugin qui repose sur la présence de rapports,
+              affectez cette annotation à <varname>true</varname>.
+              La valeur par défaut de ce flag est <varname>false</varname>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>@aggregator (true|false)</term>
+
+            <listitem>
+              <para>Un goal possédant cette propriété affectée à <varname>true</varname> est supposé ne s'exécuter qu'une seule fois lors d'une exécution de Maven.
+              Cette propriété a été créée pour donner aux développeurs la possibilité d'agréger la sortie d'une série de builds.
+              Par exemple, si vous voulez créer un plugin qui effectue un rapport consolidant la sortie des projets d'un build.
+              Un goal avec <varname>aggregator</varname> affecté à <varname>true</varname> ne devrait s'exécuter qu'à partir du projet de plus haut-niveau d'un build Maven.
+              Sa valeur par défaut est <varname>false</varname>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>@requiresOnline (true|false)</term>
+
+            <listitem>
+              <para>Spécifie si un goal donné peut s'exécuter en mode hors connexion.
+              Si un goal nécessite l'utilisation de ressources réseau et que ce flag est activé, Maven affichera une erreur si le goal est exécuté en mode hors connexion.
+              La valeur par défaut pour cette propriété est <varname>false</varname>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>@requiresDirectInvocation</term>
+
+            <listitem>
+              <para>Si vous affectez cette propriété à <varname>true</varname>, 
+            le goal pourra seulement s'exécuter via un appel direct en ligne de commande par un utilisateur.
+            Si quelqu'un essaye de rattacher ce goal à une phase du cycle de vie dans un <acronym>POM</acronym>, Maven affichera un message d'erreur.
+            La valeur par défaut pour est propriété est <varname>false</varname>.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>@phase &lt;phaseName&gt;</term>
+
+            <listitem>
+              <para>Cette annotation spécifie la phase par défaut d'un goal.
+              Si vous n'avez pas spécifié de phase pour exécuter ce goal, Maven rattachera celui-ci à la phase définie par cette annotation.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>@execute [goal=goalName|phase=phaseName
+            [lifecycle=lifecycleId]]</term>
+
+            <listitem>
+              <para>Cette annotation peut être utilisée de différentes manières.
+              Si une phase est fournie, Maven exécutera un cycle de vie parallèle en fin d'une phase spécifique.
+              Le résultat de cette exécution parallèle est rendu disponible dans la propriété Maven <varname>\${executedProperty}</varname>.</para>
+
+              <para>La seconde manière d'utiliser cette annotation est de spécifier explicitement un goal en utilisant la notation <varname>prefix:goal</varname>.
+              Lorsque vous spécifiez un goal, Maven exécute celui-ci dans un environnement parallèle, qui n'affecte pas le build Maven courant.</para>                 
+
+              <para>La troisième manière d'utiliser cette annotation est de spécifier une phase dans un cycle de vie alternatif en utilisant un identifiant de cycle de vie.</para>
+
+              <programlisting language="java">@execute phase="package" lifecycle="zip"
+@execute phase="compile"
+@execute goal="zip:zip"</programlisting>
+            </listitem>
+          </varlistentry>
+        </variablelist></para>
+
+      <para>Si vous regardez le code source du <classname>EchoMojo</classname>,
+      vous noterez que Maven n'utilise pas des annotations standards au format Java 5.
+      À la place, il utilise les <ulink url="http://commons.apache.org/attributes/">Commons Attributes</ulink>.
+      Commons Attributes fournissait un moyen d'utiliser des annotations avant qu'elles ne fassent partie intégrante des spécifications Java.
+      Pourquoi ne pas utiliser les annotations Java  5 ?
+      Maven ne les utilise pas car il a été conçu pour des <acronym>JVM</acronym>s pré-Java 5.
+      Comme Maven désire rester compatible avec les versions antérieures de Java, il ne peut pas utiliser les fonctionnalités disponibles dans Java 5.</para>
+    </section>
+
+    <section id="writing-plugins-sect-failure">
+      <title>Lorsque un Mojo échoue</title>
+
+      <para>La méthode <methodname>execute()</methodname> d'un Mojo lance deux types d'exceptions : <classname>MojoExecutionException</classname> et
+      <classname>MojoFailureException</classname>. 
+      La différence entre ces deux exceptions est aussi subtile qu'importante, ces exception ont un impact sur ce qui arrive lorsqu'une exécution "échoue". 
+      Une <classname>MojoExecutionException</classname> se doit d'être fatale, quelque chose d'irrécupérable est arrivé.
+      Lancez cette exception lorsque quelque chose arrive et que vous souhaitez arrêter le build.
+      Par exemple, vous essayez d'écrire sur le disque qui n'a plus d'espace libre ou que vous essayez de vous connecter à un dépôt distant qui ne répond pas.  
+      Lancez donc <classname>MojoExecutionException</classname> si vous n'avez aucune chance que votre build puisse continuer correctement,
+      lorsque quelque chose d'horrible est arrivé et que vous voulez arrêter le build et afficher à l'utilisateur un message "BUILD ERROR".</para> 
+      
+      <para>L'exception <classname>MojoFailureException</classname> correspond à un événement moins catastrophique, quelque chose qui ne doit pas déclencher la fin du build.
+      Un test unitaire peut échouer, un checksum <acronym>MD5</acronym> peut échouer, ces deux exemples sont des problèmes,
+      mais pas assez important pour arrêter votre build.       
+      C'est dans ce type situation que vous devez utiliser <classname>MojoFailureException</classname>.  
+      Maven prévoit plusieurs comportements différents lorsqu'un projet échoue.
+      En voici les descriptions.</para>
+
+
+      <para>Lorsque vous lancez un build Maven, vous pouvez invoquer une série de projets qui peuvent chacun soit réussir soit échouer.
+      Vous pouvez démarrer Maven sous trois modes différents :</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>mvn -ff</term>
+
+          <listitem>
+            <para>Mode fail-fast : Maven échoue (s'arrête) au premier échec.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>mvn -fae</term>
+
+          <listitem>
+            <para>Mode Fail-at-end : dans ce mode, Maven échouera à la fin du build.
+            Si un projet du reactor de Maven échoue, Maven continuera l'exécution de son build et n'affichera l'échec qu'en fin de build.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>mvn -fn</term>
+
+          <listitem>
+            <para>Mode Fail never : Maven ne s'arrête pas en cas d'échec et ne reportera pas d'erreur.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+
+      <para>Vous pourrez vouloir ignorer les erreurs si vous exécutez un build d'intégration continue et que vous voulez le poursuivre même lorsque le build de l'un des projets échoue.
+       En tant que développeur de plugin, vous devez prendre soin de lancer la bonne exception <classname>MojoExecutionException</classname> ou
+      <classname>MojoFailureExeception</classname> en fonction de votre type d'erreur.</para>       
+    </section>
+  </section>
+
+  <section id="writing-plugins-sect-mojo-params">
+    <title>Paramètres d'un Mojo</title>
+
+    <para>Cette notion est aussi importante que celles de la méthode <methodname>execute()</methodname> et des annotations de Mojo.
+    Un Mojo est configuré par l'intermédiaire de paramètres.
+    Cette section se concentre sur les sujets et la configuration de ces paramètres de Mojo.</para>
+
+    <section id="writing-plugins-sect-param-values">
+      <title>Affecter des valeurs aux paramètres de Mojo</title>
+
+      <para>Dans notre <varname>EchoMojo</varname>, nous avons déclaré un paramètre 'message' en utilisant l'annotation suivante :</para>
+
+      <programlisting language="java">/**
+ * Any Object to print out.
+ * @parameter
+ *       expression="\${echo.message}"
+ *       default-value="Hello Maven World"
+ */
+private Object message;
+</programlisting>
+
+      <para>L'expression par défaut pour ce paramètre est <varname>\${echo.message}</varname>. 
+      Cela veut dire que Maven essayera d'utiliser la valeur de la propriété <varname>echo.message</varname> pour affecter la valeur du message.
+      Si cette propriété est nulle, le paramètre prendra la valeur définie grâce à l'attribut <varname>default-value</varname> de l'annotation <classname>@parameter</classname>.
+      Au lieu d'utiliser la propriété <varname>echo.message</varname>, vous pouvez configurer une valeur pour ce message directement à partir du <acronym>POM</acronym> de votre projet.</para>
+      
+      <para>Plusieurs moyens existent pour renseigner la valeur du paramètre 'message' de notre <classname>EchoMojo</classname>.
+      Premièrement, vous pouvez passer une valeur à partir de la ligne de commande en utilisant la syntaxe suivante (à supposer que vous ayez ajouté
+      <varname>org.sonatype.mavenbook.plugins</varname> à votre <sgmltag>pluginGroups</sgmltag>) :</para>
+
+      <screen>$ mvn first:echo -Decho.message="Hello Everybody"</screen>
+
+      <para>Vous pouvez également spécifier la valeur de ce message en définissant une propriété dans votre <acronym>POM</acronym> ou dans votre fichier
+      <filename>settings.xml</filename>.</para>
+
+      <programlisting language="xml">&lt;project&gt;
+  ...
+  &lt;properties&gt;
+    &lt;echo.message&gt;Hello Everybody&lt;/echo.message&gt;
+  &lt;/properties&gt;
+&lt;/project&gt;
+</programlisting>
+
+      <para>Ce paramètre peut également être configuré directement par l'intermédiaire d'une valeur de configuration de votre plugin.
+      Si vous voulez personnaliser directement le paramètre 'message', vous pouvez utiliser la configuration suivante pour votre build.
+      Celle-ci court-circuite la propriété <varname>echo.message</varname> et renseigne le paramètre du Mojo à partir de la configuration du plugin.</para>
+
+      <programlisting language="xml">&lt;project&gt;
+  ...
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.sonatype.mavenbook.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;first-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+        &lt;configuration&gt;
+          &lt;message&gt;Hello Everybody!&lt;/message&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+&lt;/project&gt;</programlisting>
+
+      <para>Si vous désirez exécuter votre <classname>EchoMojo</classname> deux fois dans différentes phases du cycle de vie,
+      et si vous voulez configurer le paramètre 'message' avec deux valeurs différentes,
+      vous pouvez configurer la valeur de ce paramètre à partir de la balise <varname>execution</varname> dans votre <acronym>POM</acronym> de la manière suivante :</para>    
+
+      <programlisting language="xml">&lt;build&gt;
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.sonatype.mavenbook.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;first-maven-plugin&lt;/artifactId&gt;
+        &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+        &lt;executions&gt;
+          &lt;execution&gt;
+            &lt;id&gt;first-execution&lt;/id&gt;
+            &lt;phase&gt;generate-resources&lt;/phase&gt;
+            &lt;goals&gt;
+              &lt;goal&gt;echo&lt;/goal&gt;
+            &lt;/goals&gt;
+            &lt;configuration&gt;
+              &lt;message&gt;The Eagle has Landed!&lt;/message&gt;
+            &lt;/configuration&gt;
+          &lt;/execution&gt;
+          &lt;execution&gt;
+            &lt;id&gt;second-execution&lt;/id&gt;
+            &lt;phase&gt;validate&lt;/phase&gt;
+            &lt;goals&gt;
+              &lt;goal&gt;echo&lt;/goal&gt;
+            &lt;/goals&gt;
+            &lt;configuration&gt;
+              &lt;message&gt;\${project.version}&lt;/message&gt;
+            &lt;/configuration&gt;
+          &lt;/execution&gt;
+        &lt;/executions&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+&lt;/build&gt;</programlisting>
+
+      <para>Même si ce dernier exemple est assez verbeux, il illustre la flexibilité de Maven.
+      Dans l'exemple précédent, vous avez rattaché l'<classname>EchoMojo</classname> aux phases <varname>validate</varname> et <varname>generate-resources</varname> du cycle de vie par défaut. 
+      La première balise <varname>execution</varname> est rattachée à la phase <varname>generate-resources</varname>, 
+      elle fournit la valeur suivante à la propriété 'message' : "The Eagle has Landed!".  
+      La seconde balise <varname>execution</varname> est rattachée à la phase <varname>validate</varname>, 
+      elle fournit une référence à la propriété <varname>\${project.version}</varname>. 
+      Lorsque vous exécutez la commande <command>mvn install</command> sur ce projet,  
+      vous verrez que le goal <varname>first:echo</varname> s'exécute deux fois et affiche deux messages différents.</para> 
+
+    </section>
+
+    <section id="writing-plugins-sect-multival-params">
+      <title>Paramètres de Mojo multi-valeurs</title>
+
+      <para>Les plugins peuvent avoir des paramètres qui acceptent plusieurs valeurs.
+      Jetez un coup d'oeil au <classname>ZipMojo</classname> affiché dans l'<xref linkend="ex-plugin-multivalue" />.
+      Les paramètres <varname>includes</varname> et <varname>excludes</varname> acceptent un tableau de <classname>String</classname>  
+      qui spécifient des paramètres d'inclusion et l'exclusion pour créer le fichier <acronym>ZIP</acronym>.</para>
+
+      <example id="ex-plugin-multivalue">
+        <title>Un plugin avec des paramètres multi-valeurs</title>
+
+        <programlisting language="java">package org.sonatype.mavenbook.plugins
+
+/**
+ * Zips up the output directory.
+ * @goal zip
+ * @phase package
+ */
+public class ZipMojo extends AbstractMojo
+{
+    /**
+     * The Zip archiver.
+     * @parameter \
+         expression="\${component.org.codehaus.plexus.archiver.Archiver#zip}"
+     */
+    private ZipArchiver zipArchiver;
+
+    /**
+     * Directory containing the build files.
+     * @parameter expression="\${project.build.directory}"
+     */
+    private File buildDirectory;
+
+    /**
+     * Base directory of the project.
+     * @parameter expression="\${basedir}"
+     */
+    private File baseDirectory;
+
+    /**
+     * A set of file patterns to include in the zip.
+     * @parameter alias="includes"
+     */
+    private String[] mIncludes;
+
+    /**
+     * A set of file patterns to exclude from the zip.
+     * @parameter alias="excludes"
+     */
+    private String[] mExcludes;
+
+    public void setExcludes( String[] excludes ) { mExcludes = excludes; }
+
+    public void setIncludes( String[] includes ) { mIncludes = includes; }
+
+    public void execute()
+        throws MojoExecutionException
+    {
+        try {
+            zipArchiver.addDirectory( buildDirectory, includes, excludes );
+            zipArchiver.setDestFile( new File( baseDirectory, "output.zip" ) );
+            zipArchiver.createArchive();
+        } catch( Exception e ) {
+            throw new MojoExecutionException( "Could not zip", e );
+        }
+    }
+}
+</programlisting>
+
+        <para>Pour configurer un paramètre de Mojo multi-valeurs, vous pouvez utiliser une liste d'éléments.
+        Si le nom d'un paramètre multi-valeurs est <varname>includes</varname>, vous utiliserez une balise <sgmltag>includes</sgmltag> contenant des éléments <sgmltag>include</sgmltag>.   
+        Si le paramètre multi-valeurs est <varname>excludes</varname>, vous utiliserez une balise <sgmltag>excludes</sgmltag> contenant des éléments <sgmltag>exclude</sgmltag>.
+        Pour configurer le <classname>ZipMojo</classname> pour qu'il ignore tous les fichiers <varname>.txt</varname> et tous les fichiers qui terminent par un tilde, 
+        vous pouvez utiliser la configuration de plugin suivante.</para>  
+
+      </example>
+
+      <programlisting language="xml">&lt;project&gt;
+  ...
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.sonatype.mavenbook.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;zip-maven-plugin&lt;/artifactId&gt;
+        &lt;configuration&gt;
+          &lt;excludes&gt;
+            &lt;exclude&gt;**/*.txt&lt;/exclude&gt;
+            &lt;exclude&gt;**/*~&lt;/exclude&gt;
+          &lt;/excludes&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+&lt;/project&gt;
+</programlisting>
+    </section>
+
+    <section id="writing-plugins-sect-depend-plexus">
+      <title>Dépendre de composants Plexus</title>
+
+      <para>Un Mojo est un composant géré par un conteneur <acronym>IoC</acronym> appelé Plexus.
+      Un Mojo peut dépendre d'un autre composant géré par Plexus en déclarant un paramètre Mojo
+      et en utilisant les annotations <classname>@parameter</classname> ou <classname>@component</classname>.
+      L'<xref linkend="ex-plugin-multivalue" /> présente le Mojo <classname>ZipMojo</classname> qui dépend
+      d'un composant Plexus en utilisant l'annotation <classname>@parameter</classname>. Nous aurions pu
+      déclarer cette dépendance en utilisant l'annotation <classname>@component</classname>.</para>
+
+      <example>
+        <title>Dépendre de composants Plexus</title>
+
+        <programlisting language="java">/**
+ * The Zip archiver.
+ * @component role="org.codehaus.plexus.archiver.Archiver" roleHint="zip"
+ */
+private ZipArchiver zipArchiver;</programlisting>
+      </example>
+
+      <para>Lorsque Maven instancie ce Mojo, il essaye de récupérer le composant Plexus ayant le rôle 
+      et le raccourci de rôle spécifiés. Dans cet exemple, le Mojo sera rattaché au composant ZipArchiver.
+      ce qui permettra à notre <classname>ZipMojo</classname> de créer des fichiers <acronym>ZIP</acronym>.</para>
+
+      <!--TODO: OK, we need more here.  How do I get my hands on components?  How to a bundle components?-->
+    </section>
+
+    <section id="writing-plugins-sect-param-annot">
+      <title>Paramètres des annotations d'un Mojo</title>
+
+      <para>À moins d'insister pour écrire vos descripteurs de plugin vous-même, vous ne devriez pas à avoir à écrire la moindre ligne de <acronym>XML</acronym>.
+      À la place de cela, le plugin Maven Plugin dispose d'un goal <varname>plugin:descriptor</varname> qui est rattaché à la phase <varname>generate-resources</varname>.
+      Ce goal génère le descripteur de plugin à partir d'annotations sur votre Mojo.
+      Pour configurer un paramètre de Mojo, vous pouvez utiliser les annotations présentées ci-dessous sur chacun des des champs privés du Mojo.
+      Il est aussi poiisble de mettre ces annotations sur les accesseurs publics du Mojo. Cependant, la convention veut que l'on configure
+      les plugins Maven en utilisant les annotations directement sur les champs.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>@parameter [alias="someAlias"]
+          [expression="\${someExpression}"] [default-value="value"]</term>
+
+          <listitem>
+            <para>Marque comme paramètre un champ privé (ou un accesseur).
+            L'<varname>alias</varname> fournit le nom du paramètre.
+            Si l'alias n'est pas renseigné, Maven utilise le nom de la variable comme nom du paramètre.
+            L'<varname>expression</varname> est l'expression utilisée par Maven pour obtenir une valeur du paramètre.
+            L'expression fait souvent référence à une propriété : <varname>\${echo.message}</varname>.
+            La valeur par défaut est renseignée par <varname>default-value</varname>, celle-ci est utilisée si aucune valeur ne peut être obtenue à partir de l'expression
+            ou si aucune valeur n'a été fournie par la configuration du plugin dans le <acronym>POM</acronym>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>@required</term>
+
+          <listitem>
+            <para>Si cette annotation est présente, ce paramètre doit obligatoirement être renseigné avant
+            l'exécution du Mojo. Si Maven essaye d'exécuter le Mojo alors que ce paramètre est nul alors 
+            Maven va lancer une erreur.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>@readonly</term>
+
+          <listitem>
+            <para>Si cette annotation est présente, alors l'utilisateur ne peut peut pas configurer ce paramètre via le fichier <acronym>POM</acronym>.
+            Cette annotation est utilisée en combinaison avec l'attribut expression de l'annotation de ce paramètre.
+            Par exemple, si vous voulez être sure que cette propriété possède la valeur que la propriété 
+            <varname>finalName</varname> du <acronym>POM</acronym>,
+            vous utiliserez l'expression <varname>\${build.finalName}</varname> et rajouterez l'annotation <classname>@readOnly</classname>. 
+            Ainsi, l'utilisateur ne pourra changer la valeur de ce paramètre qu'en changeant la valeur du <varname>finalName</varname> dans le <acronym>POM</acronym>.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>@component</term>
+
+          <listitem>
+            <para>Demande à Maven d'injecter un composant Plexus dans le champ.
+            Voici un exemple d'utilisation de cette annotation <classname>@component</classname> :</para>
+
+            <programlisting language="java">@component role="org.codehaus.plexus.archiver.Archiver" roleHint="zip"
+</programlisting>
+
+            <para>Cette ligne a pour effet de récupérer le composant 
+            <classname>ZipArchiver</classname> à partir de Plexus. 
+            Il s'agit de l'Archiver qui correspond au role hint <varname>zip</varname>.
+            An lieu d'injecter des composants, vous pouvez également utiliser l'annotation <classname>@parameter</classname> en utilisant une expression :</para> 
+            
+            <programlisting language="java">@parameter expression="\${component.org.codehaus.plexus.archiver.Archiver#zip}"
+</programlisting>
+
+            <para>Si ces deux annotations ont le même comportement,
+            l'annotation <classname>@component</classname> est à privilégier pour configurer des dépendances sur des composants Plexus.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>@deprecated</term>
+
+          <listitem>
+            <para>Indique que ce paramètre est déprécié.
+            Les utilisateurs peuvent continuer de configurer ce paramètre,
+            mais un warning sera affiché.</para> 
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+  </section>
+
+  <section id="writing-plugins-sect-plugins-lifecycle">
+    <title>Plugins et le cycle de vie Maven</title>
+
+    <para>Dans le chapitre <xref linkend="lifecycle" />,
+    nous avons vu que les cycles de vie peuvent être personnalisés en fonction du type de packaging.
+    Un plugin peut soit introduire un nouveau type de packaging, soit personnaliser le cycle de vie.
+    Dans cette section, nous allons voir comment personnaliser le cycle de vie à partir d'un plugin Maven.
+    Nous verrons également comment dire à un Mojo de d'exécuter un cycle de vie parallèle.</para>
+
+    <section id="writing-plugins-sect-execute-parallel-lifecycle">
+      <title>Exécution dans un cycle de vie parallèle</title>
+
+      <para>Imaginons que vous devez écrire un plugin qui dépend du résultat du build précédent.
+      Par exemple, peut-être que le goal du <classname>ZipMojo</classname> ne peut être lancé que si un élément du résultat existe pour être inclus dans l'archive .
+      Il est possible de préciser des goal prérequis en utilisant l'annotation <classname>@execute</classname> sur un Mojo.
+      Cette annotation forcera Maven à lancer un build parallèle et exécuter un goal ou un cycle de vie dans cette seconde instance de Maven sans que tout cela affecte le build courant.
+      Si vous avez écrit un Mojo que vous exécutez une fois par jour pour lancer la commande <command>mvn install</command>
+      et packager le résultat sous un format de distribution personnalisé.
+      Votre descripteur de Mojo peut demander à Maven d'exécuter le cycle de vie par défaut jusqu'à la phase install et d'exposer le 
+      résultat de ce projet dans votre mojo en utilisant la propriété <varname>\${executedProject}</varname>.
+      Vous pouvez ensuite référencer cette propriété dans un projet et effectuer ainsi un traitement à posteriori.</para>
+
+      <para>Autre possibilité, si vous avez un goal qui effectue quelque chose de complètement indépendant du cycle de vie par défaut.
+      Imaginons quelque chose de complètement inattendu,
+      vous disposez peut-être d'un goal qui transforme un fichier <acronym>WAV</acronym> en <acronym>MP3</acronym> en utilisant quelque chose comme <acronym>LAME</acronym>.  
+      Avant de faire cela, vous voulez parcourir un cycle de vie qui transforme un fichier <acronym>MIDI</acronym> en un fichier <acronym>WAV</acronym> 
+      (vous pouvez faire faire tout ce que vous voulez à Maven, et cet exemple n'est pas aussi "tiré par les cheveux" qu'on pourrait le croire).
+      Vous avez donc créé un cycle de vie <varname>midi-sound</varname> et vous voulez utiliser le résultat de la phase <varname>install</varname> de ce cycle de vie
+      dans une application web qui possède un type de packaging <varname>war</varname>.
+      Comme votre projet est exécuté dans le cycle de vie <varname>war</varname>,
+      vous devez avoir un goal qui va lancer votre cycle de vie <varname>midi-source</varname> en parallèle de ce build.
+      Pour cela, vous devez annoter votre mojo avec <varname>@execute lifecycle="midi-source" phase="install"</varname>.</para>
+
+      <variablelist>
+        <varlistentry>
+          <term>@execute goal="&lt;goal&gt;"</term>
+
+          <listitem>
+            <para>Cette annotation provoque l'exécution d'un goal donné avant celui annoté.
+            Le nom du goal doit être donné en utilisant la notation <varname>prefix:goal</varname>.</para>  
+            
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>@execute phase="&lt;phase&gt;"</term>
+
+          <listitem>
+            <para>Un cycle de vie alternatif, spécifié par la phase donnée, sera exécuté en parallèle avant de reprendre l'exécution courante.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>@execute lifecycle="&lt;lifecycle&gt;"
+          phase="&lt;phase&gt;"</term>
+
+          <listitem>
+            <para>Cette annotation provoque l'exécution du cycle de vie alternatif. Un cycle de vie personnalisé peut être défini dans le fichier
+            <filename>META-INF/maven/lifecycle.xml</filename>.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+
+    <section id="writing-plugins-sect-custom-lifecycle">
+      <title>Création d'un cycle de vie personnalisé</title>
+
+      <para>Un cycle de vie personnalisé doit être packagé dans un plugin dans un fichier 
+      <filename>META-INF/maven/lifecycle.xml</filename> dans l'un des dossiers de ressources : par exemple <filename>src/main/resources</filename>.
+      Le fichier  <filename>lifecycle.xml</filename> suivant déclare un cycle de vie nommé 
+      <varname>zipcycle</varname>. Celui-ci contient un unique goal,
+      <varname>zip</varname>, dans une seule phase, <varname>package</varname>.</para>
+
+      <para><example>
+          <title>Définition d'un cycle de vie par défaut dans le fichier lifecycle.xml</title>
+
+          <programlisting language="xml">&lt;lifecycles&gt;
+  &lt;lifecycle&gt;
+    &lt;id&gt;zipcycle&lt;/id&gt;
+    &lt;phases&gt;
+      &lt;phase&gt;
+        &lt;id&gt;package&lt;/id&gt;
+        &lt;executions&gt;
+          &lt;execution&gt;
+            &lt;goals&gt;
+              &lt;goal&gt;zip&lt;/goal&gt;
+            &lt;/goals&gt;
+          &lt;/execution&gt;
+        &lt;/executions&gt;
+      &lt;/phase&gt;
+    &lt;/phases&gt;
+  &lt;/lifecycle&gt;
+&lt;/lifecycles&gt;
+</programlisting>
+        </example></para>
+
+      <para>Si vous voulez exécuter la phase <varname>zipcycle</varname> au sein d'un autre build,
+      vous pouvez créer un <classname>ZipForkMojo</classname> qui utilise l'annotation <classname>@execute</classname>
+      pour demander à Maven de traverser la phase <varname>zipcycle</varname> avant l'exécution du build courant.</para>   
+
+      <para><example>
+          <title>Fork d'un cycle de vie à partir d'un Mojo</title>
+
+          <programlisting language="java">/**
+ * Forks a zip lifecycle.
+ * @goal zip-fork
+ * @execute lifecycle="zipcycle" phase="package"
+ */
+public class ZipForkMojo extends AbstractMojo
+{
+  public void execute()
+    throws MojoExecutionException
+  {
+    getLog().info( "doing nothing here" );
+  }
+}
+</programlisting>
+        </example></para>
+
+      <para>Exécuter le <classname>ZipForkMojo</classname> lancera un fork du cycle de vie.
+      Si vous avez configuré votre plugin pour qu'il s'exécuter avec le préfixe <varname>zip</varname>,
+      l'exécution de <varname>zip-fork</varname> devrait produire une sortie ressemblant à cela.</para>
+
+      <screen>$ mvn zip:zip-fork
+[INFO] Scanning for projects...
+[INFO] Searching repository for plugin with prefix: 'zip'.
+[INFO] ----------------------------------------------------------------------
+[INFO] Building Maven Zip Forked Lifecycle Test
+[INFO]    task-segment: [zip:zip-fork]
+[INFO] ----------------------------------------------------------------------
+[INFO] Preparing zip:zip-fork
+[INFO] [site:attach-descriptor]
+[INFO] [zip:zip]
+[INFO] Building zip: \
+   ~/maven-zip-plugin/src/projects/zip-lifecycle-test/target/output.zip
+[INFO] [zip:zip-fork]
+[INFO] doing nothing here
+[INFO] ---------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ---------------------------------------------------------------------
+[INFO] Total time: 1 second
+[INFO] Finished at: Sun Apr 29 16:10:06 CDT 2007
+[INFO] Final Memory: 3M/7M
+[INFO] ---------------------------------------------------------------------
+</screen>
+
+      <para>L'exécution de <varname>zip-fork</varname> a créé un nouveau cycle de vie,
+      Maven a ensuite exécuté le cycle de vie <varname>zipcycle</varname> et a affiché le message contenu dans notre <classname>ZipFormMojo</classname>.</para>
+    </section>
+
+    <section id="writing-plugins-sect-override-default-lifecycle">
+      <title>Surcharge du cycle de vie par défaut</title>
+
+      <para>Une fois que vous avez créé votre propre cycle de vie et que vous l'avez lancé depuis un Mojo,
+      la question suivante que vous pouvez vous poser est comment surcharger le cycle de vie par défaut. 
+      Comment créer un cycle de vie personnalisé et comment le rattacher à vos projets ?
+      Dans le <xref linkend="lifecycle" />, nous avons vu que le type de packaging d'un projet définit son cycle de vie.
+      Le comportement différe selon les types de packaging, ainsi 
+      <varname>war</varname> a rattaché différents goals au cycle de vie pour construire son package.
+      Les cycles de vie personnalisés, comme <varname>swf</varname>, provenant du plugin Israfil Flex 3, rattachent différents goals à la phase compile.   
+      Lorsque vous créez un cycle de vie personnalisé, vous pouvez rattacher celui-ci à un type de packaging en fournissant une configuration Plexus dans l'archive de votre plugin.</para>      
+
+      <para>Pour définir un nouveau cycle de vie pour un nouveau type de packaging, vous devez configurer le composant <classname>LifecycleMapping</classname> dans Plexus. 
+      Dans votre projet plugin, créez un fichier <filename>META-INF/plexus/components.xml</filename> sous <filename>src/main/resources</filename>.       
+      Éditez ce fichier et ajoutez lui le contenu de l'<xref linkend="ex-override-lifecycle" />.
+      Mettez le nom du type de packaging dans <varname>role-hint</varname>,
+      et rattachez les goals aux phases en utilisant leurs coordonnées (sans la version).
+      Vous pouvez associer plusieurs goals à une phase en utilisant une liste séparée par des virgules.</para>   
+
+      <para><example id="ex-override-lifecycle">
+          <title>Surcharge du cycle de vie par défaut</title>
+
+          <programlisting language="xml">&lt;component-set&gt;
+  &lt;components&gt;
+    &lt;component&gt;
+      &lt;role&gt;org.apache.maven.lifecycle.mapping.LifecycleMapping&lt;/role&gt;
+      &lt;role-hint&gt;zip&lt;/role-hint&gt;
+      &lt;implementation&gt;
+        org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping
+      &lt;/implementation&gt;
+      &lt;configuration&gt;
+        &lt;phases&gt;
+          &lt;process-resources&gt;
+            org.apache.maven.plugins:maven-resources-plugin:resources
+          &lt;/process-resources&gt;
+          &lt;compile&gt;
+            org.apache.maven.plugins:maven-compiler-plugin:compile
+          &lt;/compile&gt;
+          &lt;package&gt;org.sonatype.mavenbook.plugins:maven-zip-plugin:zip&lt;/package&gt;
+        &lt;/phases&gt;
+      &lt;/configuration&gt;
+    &lt;/component&gt;
+  &lt;/components&gt;
+&lt;/component-set&gt;
+</programlisting>
+        </example></para>
+
+      <para>Si vous créez un plugin qui définit un nouveau type de packaging et un nouveau cycle de vie,
+      vous devez affecter la balise <sgmltag>extensions</sgmltag> à <varname>true</varname> dans le <acronym>POM</acronym> de votre projet.
+      Cela a pour effet de demander à Maven de scanner votre plugin à la recherche du fichier <filename>components.xml</filename> dans le répertoire <filename>META-INF/plexus</filename>.   
+      Ainsi, votre nouveau type de packaging sera rendu disponible dans votre projet.</para>
+
+      <para><example>
+          <title>Configuration d'un plugin en Extension</title>
+
+          <programlisting language="xml">&lt;project&gt;
+  ...
+  &lt;build&gt;
+    ...
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;com.training.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-zip-plugin&lt;/artifactId&gt;
+        &lt;extensions&gt;true&lt;/extensions&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+&lt;/project&gt;
+</programlisting>
+        </example></para>
+
+      <para>Une fois que vous avez ajouté le plugin avec sa balise <sgmltag>extensions</sgmltag> activée, vous pourrez utiliser votre nouveau type de packaging.
+      Votre projet pourra ainsi exécuter le cycle de vie personnalité associé à celui-ci.</para>
+    </section>
+  </section>
+</chapter>

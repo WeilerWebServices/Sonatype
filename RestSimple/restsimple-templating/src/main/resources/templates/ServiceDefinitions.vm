@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>ServiceDefinitionTemplate</title>
+</head>
+<body>
+<h1>ServiceDefinition</h1>
+
+<div name="ServiceDefinition">
+    <p class="rooturi">
+        ROOT URI: $sd.path()
+    </p>
+
+    <p class="consuming">
+        Consuming:
+    <ul>
+        #foreach( $p in $sd.mediaToConsume() )
+            <li>$p</li>
+        #end
+    </ul>
+    </p>
+    <p class="producing">
+        Producing:
+    <ul class="ul-producing">
+        #foreach( $p in $sd.mediaToProduce() )
+            <li class="li-producing">$p</li>
+        #end
+    </ul>
+    </p>
+
+</div>
+    #foreach( $sh in $sd.serviceHandlers() )
+    <h2> ServiceHandler </h2>
+
+    <div class="ServiceHandler">
+        <p class="uri">
+            URI: $sd.path()${sh.path()}
+        </p>
+
+        <p class="method">
+            Method: ${sh.getHttpMethod()}
+        </p>
+
+        #if($sh.consumeClass())
+        <p class="sh-consuming">
+            Consuming: $sh.consumeMediaType() using class $sh.consumeClass()
+        </p>
+        #else
+            <p>
+            Consuming: $sh.consumeMediaType()
+            </p>
+        #end
+
+        <p class="sh-producing">
+            Producing:
+        <ul>
+            #foreach( $p in $sh.produceMediaType() )
+                <li>$p</li>
+            #end
+        </ul>
+        </p>
+        <p class="action">
+            Action: $sh.action
+        </p>
+    </div>
+    #end
+</body>
+</html>

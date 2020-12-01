@@ -1,0 +1,13 @@
+<h2>Edit Workout Details</h2>
+
+<form method="POST">
+  Workout Date: 
+  #springBind( "workout.date" )
+    <input type="text" 
+           name="${status.expression}" 
+           value="$!status.value" /><br>
+     #foreach($error in $status.errorMessages) <b>$error</b> <br> 
+  #end
+  <br>
+  <input type="submit" value="Add New Workout"/>
+</form>

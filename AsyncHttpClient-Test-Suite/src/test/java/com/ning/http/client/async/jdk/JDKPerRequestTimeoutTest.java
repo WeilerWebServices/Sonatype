@@ -1,0 +1,44 @@
+/*
+ * Copyright (c) 2010-2011 Sonatype, Inc. All rights reserved.
+ *
+ * This program is licensed to you under the Apache License Version 2.0,
+ * and you may not use this file except in compliance with the Apache License Version 2.0.
+ * You may obtain a copy of the Apache License Version 2.0 at http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the Apache License Version 2.0 is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Apache License Version 2.0 for the specific language governing permissions and limitations there under.
+ */
+package com.ning.http.client.async.jdk;
+
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.async.PerRequestTimeoutTest;
+import com.ning.http.client.async.ProviderUtil;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+
+public class JDKPerRequestTimeoutTest extends PerRequestTimeoutTest {
+    @Override
+    public AsyncHttpClient getAsyncHttpClient(AsyncHttpClientConfig config) {
+        return ProviderUtil.jdkProvider(config);
+    }
+
+    @Test(groups = {"standalone", "default_provider"}, enabled = false)
+    public void testRequestTimeout() throws IOException {
+    }
+
+    @Test(groups = {"standalone", "default_provider"}, enabled = false)
+    public void testGlobalDefaultPerRequestInfiniteTimeout() throws IOException {
+    }
+
+    @Test(groups = {"standalone", "default_provider"}, enabled = false)
+    public void testGlobalRequestTimeout() throws IOException {
+    }
+
+    @Test(groups = {"standalone", "default_provider"})
+    public void testGlobalIdleTimeout() throws IOException {
+    }
+}

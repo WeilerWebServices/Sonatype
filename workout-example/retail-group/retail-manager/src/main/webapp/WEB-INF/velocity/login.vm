@@ -1,0 +1,23 @@
+<h2>Login to the Workout Tracker</h2>
+
+<p>Login to your Workout tracker account to start charting
+a course to a better you:</p>
+
+<form method="POST">
+  Username: 
+  #springBind( "login.login" )
+    <input type="text" 
+           name="${status.expression}" 
+           value="$!status.value" /><br>
+     #foreach($error in $status.errorMessages) <b>$error</b> <br> 
+  #end
+  <br>
+  Password: 
+  #springBind( "login.password" )
+    <input type="password" 
+           name="${status.expression}" 
+           value="$!status.value" /><br>
+     #foreach($error in $status.errorMessages) <b>$error</b> <br> 
+  #end
+  <input type="submit" value="Login"/>
+</form>
